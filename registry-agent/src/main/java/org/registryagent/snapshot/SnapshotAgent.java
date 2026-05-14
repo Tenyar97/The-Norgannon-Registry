@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+
 public class SnapshotAgent {
 
     private static final Logger log = Logger.getLogger(SnapshotAgent.class.getName());
@@ -78,6 +79,7 @@ public class SnapshotAgent {
         }
     }
 
+   
     public void onEventByCharacterId(String characterId, GameEvent event) {
     	authServer.getActiveSessions().stream()
                 .filter(s -> s.getCharacterId().equals(characterId))
@@ -88,6 +90,7 @@ public class SnapshotAgent {
                 );
     }
 
+    
     private void startHeartbeat(LoginSession session) {
         scheduler.scheduleAtFixedRate(
                 () -> {
@@ -104,6 +107,7 @@ public class SnapshotAgent {
 
     private void pushNow(LoginSession session, GameEvent trigger) {
         try {
+           
             if (trigger == GameEvent.LOGIN) {
                 SnapshotRecord existing = registryClient.fetchLatest(
                         session.getCharacterId(), session.getPlayerPubKey());
@@ -164,10 +168,17 @@ public class SnapshotAgent {
     }
 
     public boolean importFromRegistry(String characterId, String playerPubKey) {
-        return importFromRegistry(characterId, playerPubKey, null);
+        return importFromRegistry(characterId, playerPubKey, null, 0);
     }
 
+   
     public boolean importFromRegistry(String characterId, String playerPubKey, ImportProfile explicitProfile) {
+        return importFromRegistry(characterId, playerPubKey, explicitProfile, 0);
+    }
+
+    
+    public boolean importFromRegistry(String characterId, String playerPubKey,
+                                      ImportProfile explicitProfile, int accountId) {
         log.info("Import requested — characterId=" + characterId
                  + " explicitProfile=" + (explicitProfile != null ? explicitProfile.getName() : "none"));
 
@@ -183,6 +194,7 @@ public class SnapshotAgent {
             return false;
         }
 
+       
         TrustStore ts = this.trustStore;
         if (ts != null && !ts.isTrusted(record.getServerPubKey())) {
             log.warning("Import BLOCKED — source server is not trusted."
@@ -193,6 +205,7 @@ public class SnapshotAgent {
             return false;
         }
 
+       
         ImportProfile profile = explicitProfile != null
                 ? explicitProfile
                 : resolveServerDefaultProfile(record.getServerPubKey());
@@ -200,7 +213,7 @@ public class SnapshotAgent {
         CharacterPayload filtered = ImportProfileFilter.apply(payload, profile);
 
         String profileName = profile != null ? profile.getName() : "permissive";
-        boolean ok = adapter.writeCharacter(characterId, filtered);
+        boolean ok = adapter.importCharacter(characterId, accountId, filtered);
         if (ok) {
             log.info("Import complete — characterId=" + characterId
                     + " source=" + record.getServerId()
@@ -210,10 +223,17 @@ public class SnapshotAgent {
             if (record.getCreatedAt() != null) {
                 createdAtCache.putIfAbsent(characterId, record.getCreatedAt());
             }
+            return true;
         } else {
-            log.warning("Import failed (adapter write error) — characterId=" + characterId);
+            
+            throw new IllegalStateException(
+                    "Snapshot found in registry but could not be written to the local database.\n\n"
+                    + "This character does not exist on this server yet.\n"
+                    + "Enter the player's local Account ID in the Account ID field and import again"
+                    + " — the character will be created automatically.\n\n"
+                    + "If an Account ID was provided, a DB error occurred — check the agent log.\n"
+                    + "characterId=" + characterId);
         }
-        return ok;
     }
 
     private ImportProfile resolveServerDefaultProfile(String serverPubKey) {

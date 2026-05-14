@@ -1,3 +1,7 @@
+-- LoginScreen.lua
+-- Passive status display on the login screen.
+-- Auth now happens in-world (PLAYER_LOGIN) — no login screen interception needed.
+-- This file just shows whether a key is configured.
 
 RC.LoginScreen = RC.LoginScreen or {}
 
@@ -43,4 +47,5 @@ function RC.LoginScreen.init()
     statusLabel:Show()
 end
 
+-- Kept for compatibility — called from RegistryCompanion.lua if auth fails
 function RC.LoginScreen.showFallback(message) end

@@ -1,5 +1,9 @@
 package org.registryagent.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InventoryItem {
 
 	private String location;
@@ -11,11 +15,13 @@ public class InventoryItem {
 	private int count;
 	private int durability;
 
+	private String templateBlob;
+
 	public InventoryItem() {
 	}
 
 	public InventoryItem(String location, int bag, int slot, long itemGuid, String namespace, String refId, int count,
-			int durability) {
+			int durability, String templateBlob) {
 		this.location = location;
 		this.bag = bag;
 		this.slot = slot;
@@ -24,6 +30,7 @@ public class InventoryItem {
 		this.refId = refId;
 		this.count = count;
 		this.durability = durability;
+		this.templateBlob = templateBlob;
 	}
 
 	public String getLocation() {
@@ -88,5 +95,13 @@ public class InventoryItem {
 
 	public void setDurability(int durability) {
 		this.durability = durability;
+	}
+
+	public String getTemplateBlob() {
+		return templateBlob;
+	}
+
+	public void setTemplateBlob(String templateBlob) {
+		this.templateBlob = templateBlob;
 	}
 }

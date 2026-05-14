@@ -1,4 +1,6 @@
 package org.registryagent.snapshot;
+
+
 public enum GameEvent {
 
     LEVEL_UP,
@@ -12,6 +14,7 @@ public enum GameEvent {
     SKILL_GAINED,
     REPUTATION_CHANGED,
 
+    
     CURRENCY_CHANGED,
 
     PET_TAMED,

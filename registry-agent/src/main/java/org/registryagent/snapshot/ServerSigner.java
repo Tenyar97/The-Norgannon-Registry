@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.HexFormat;
+
 
 public class ServerSigner {
 
@@ -40,7 +42,7 @@ public class ServerSigner {
     }
 
     public static void generateKeypair(Path privateKeyPath, Path publicKeyPath) throws IOException {
-        java.security.SecureRandom random = new java.security.SecureRandom();
+        SecureRandom random = new SecureRandom();
 
         byte[] privateKeyBytes = new byte[32];
         random.nextBytes(privateKeyBytes);

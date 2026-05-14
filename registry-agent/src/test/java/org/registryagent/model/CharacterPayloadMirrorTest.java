@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+
 class CharacterPayloadMirrorTest {
 
     private static final Set<String> EXPECTED_FIELDS = Set.of(

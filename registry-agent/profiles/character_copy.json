@@ -1,14 +1,15 @@
 {
   "name": "character_copy",
-  "description": "Full unrestricted copy. Everything transfers exactly as it was on the source server. Intended for migrations between servers of the same type run by the same owner, or GM-authorised transfers.",
+  "description": "Full unrestricted copy. Everything transfers exactly as it was on the source server, including custom item templates. Intended for migrations between servers of the same type run by the same owner, or GM-authorised transfers.",
 
-  "import_equipment":        true,
-  "import_inventory":        true,
-  "import_bank":             true,
-  "import_pets":             true,
-  "import_hearthstone":      true,
-  "import_skills":           true,
-  "import_reputation":       true,
-  "import_quests_completed": true,
-  "import_talents":          true
+  "import_equipment":              true,
+  "import_inventory":              true,
+  "import_bank":                   true,
+  "import_pets":                   true,
+  "import_hearthstone":            true,
+  "import_skills":                 true,
+  "import_reputation":             true,
+  "import_quests_completed":       true,
+  "import_talents":                true,
+  "import_custom_item_templates":  true
 }

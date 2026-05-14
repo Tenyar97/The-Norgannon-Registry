@@ -1,0 +1,14 @@
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\CompanionServer.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\handlers\BaseHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\handlers\PubkeyHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\handlers\RecoveryHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\handlers\SignHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\http\handlers\StatusHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\key\Bip39.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\key\KeyEncryption.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\key\KeyManager.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\Main.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\startup\StartupRegistrar.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\tray\TrayManager.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\ui\RecoveryDialog.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-companion\src\main\java\org\registrycompanion\ui\SetupDialog.java

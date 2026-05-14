@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class RegistryClient {
 
@@ -34,7 +35,7 @@ public class RegistryClient {
 	public RegistryClient(List<String> nodeUrls, NodeTransport transport) {
 		this.transport = transport;
 		this.nodes = nodeUrls.stream().map(RegistryNode::new)
-				.collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+				.collect(Collectors.toCollection(ArrayList::new));
 
 		log.info("RegistryClient initialized with " + nodes.size() + " nodes");
 

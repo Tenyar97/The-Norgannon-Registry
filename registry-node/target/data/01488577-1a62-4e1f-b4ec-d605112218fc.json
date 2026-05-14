@@ -1,0 +1,573 @@
+{
+  "version" : "1.0",
+  "characterId" : "01488577-1a62-4e1f-b4ec-d605112218fc",
+  "playerPubKey" : "050216bdecbb27da9671afed814c2642cf29f3d19bd3eb322c8585bc329ed815",
+  "serverId" : "1319cc70-796f-4085-96db-d1e7f7fe4a68",
+  "serverPubKey" : "2c71dee3630145e88a913916f058c4c72136b226811dd0df88958969da8b2c7e",
+  "sequence" : 2,
+  "createdAt" : "2026-05-14T20:08:14.221737400Z",
+  "updatedAt" : "2026-05-14T20:08:14.221737400Z",
+  "payload" : {
+    "identity" : {
+      "name" : "Importtester",
+      "gender" : "female",
+      "level" : 2,
+      "classRef" : "mage",
+      "classNamespace" : "wow_wotlk_3.3.5a",
+      "classLabel" : "Mage",
+      "raceRef" : "gnome",
+      "raceNamespace" : "wow_wotlk_3.3.5a",
+      "raceLabel" : "Gnome"
+    },
+    "stats" : {
+      "strength" : 15,
+      "agility" : 22,
+      "stamina" : 20,
+      "intellect" : 28,
+      "spirit" : 23,
+      "health" : 67,
+      "mana" : 250,
+      "attackPower" : 0,
+      "spellPower" : 0,
+      "defense" : 0,
+      "statExtensions" : null
+    },
+    "equipment" : [ {
+      "slot" : "body",
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "6096",
+      "label" : null
+    }, {
+      "slot" : "chest",
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "56",
+      "label" : null
+    }, {
+      "slot" : "legs",
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "1395",
+      "label" : null
+    }, {
+      "slot" : "feet",
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "55",
+      "label" : null
+    }, {
+      "slot" : "mainhand",
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "35",
+      "label" : null
+    } ],
+    "inventory" : [ {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 23,
+      "itemGuid" : 1024,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "6948",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 24,
+      "itemGuid" : 1051,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "8179",
+      "count" : 1,
+      "durability" : 25
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 25,
+      "itemGuid" : 1052,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "19154",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 26,
+      "itemGuid" : 1053,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "16650",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 27,
+      "itemGuid" : 1054,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "13215",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 28,
+      "itemGuid" : 1055,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "10771",
+      "count" : 1,
+      "durability" : 30
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 29,
+      "itemGuid" : 1056,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "6251",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 30,
+      "itemGuid" : 1057,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "19347",
+      "count" : 1,
+      "durability" : 75
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 31,
+      "itemGuid" : 1058,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "18758",
+      "count" : 1,
+      "durability" : 65
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 32,
+      "itemGuid" : 1059,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "7686",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 33,
+      "itemGuid" : 1060,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "19859",
+      "count" : 1,
+      "durability" : 75
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 34,
+      "itemGuid" : 1061,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "19877",
+      "count" : 1,
+      "durability" : 75
+    }, {
+      "location" : "inventory",
+      "bag" : 0,
+      "slot" : 35,
+      "itemGuid" : 1062,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "4703",
+      "count" : 1,
+      "durability" : 0
+    } ],
+    "bank" : [ {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 39,
+      "itemGuid" : 1027,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "7476",
+      "count" : 1,
+      "durability" : 25
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 40,
+      "itemGuid" : 1026,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "10317",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 41,
+      "itemGuid" : 1025,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "10664",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 42,
+      "itemGuid" : 1029,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "14595",
+      "count" : 1,
+      "durability" : 65
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 43,
+      "itemGuid" : 1028,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "12143",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 44,
+      "itemGuid" : 1030,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "2327",
+      "count" : 1,
+      "durability" : 20
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 45,
+      "itemGuid" : 1031,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "1815",
+      "count" : 1,
+      "durability" : 50
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 46,
+      "itemGuid" : 1035,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "3953",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 47,
+      "itemGuid" : 1034,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "6473",
+      "count" : 1,
+      "durability" : 90
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 48,
+      "itemGuid" : 1033,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "10841",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 49,
+      "itemGuid" : 1032,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "15223",
+      "count" : 1,
+      "durability" : 65
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 50,
+      "itemGuid" : 1036,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "8593",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 51,
+      "itemGuid" : 1037,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "5316",
+      "count" : 1,
+      "durability" : 80
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 52,
+      "itemGuid" : 1038,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "16108",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 53,
+      "itemGuid" : 1039,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "13102",
+      "count" : 1,
+      "durability" : 50
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 54,
+      "itemGuid" : 1040,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "3887",
+      "count" : 1,
+      "durability" : 50
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 55,
+      "itemGuid" : 1044,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "9809",
+      "count" : 1,
+      "durability" : 85
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 56,
+      "itemGuid" : 1041,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "9077",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 57,
+      "itemGuid" : 1042,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "15424",
+      "count" : 1,
+      "durability" : 60
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 58,
+      "itemGuid" : 1046,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "1092",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 59,
+      "itemGuid" : 1045,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "19313",
+      "count" : 1,
+      "durability" : 65
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 60,
+      "itemGuid" : 1049,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "6490",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 61,
+      "itemGuid" : 1050,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "4735",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 62,
+      "itemGuid" : 1048,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "1739",
+      "count" : 1,
+      "durability" : 40
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 63,
+      "itemGuid" : 1047,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "7347",
+      "count" : 1,
+      "durability" : 0
+    }, {
+      "location" : "bank",
+      "bag" : 0,
+      "slot" : 64,
+      "itemGuid" : 1043,
+      "namespace" : "wow_wotlk_3.3.5a",
+      "refId" : "5756",
+      "count" : 1,
+      "durability" : 65
+    } ],
+    "currency" : {
+      "namespace" : "wow_wotlk_3.3.5a",
+      "values" : {
+        "copper" : 0,
+        "copper_remainder" : 0,
+        "gold" : 0,
+        "silver" : 0
+      }
+    },
+    "progression" : {
+      "skills" : {
+        "wow_wotlk_3.3.5a" : {
+          "136" : 1,
+          "162" : 1,
+          "183" : 10,
+          "228" : 1,
+          "237" : 10,
+          "313" : 300,
+          "415" : 1,
+          "6" : 10,
+          "753" : 10,
+          "777" : 1,
+          "778" : 1,
+          "8" : 10,
+          "95" : 1,
+          "98" : 300
+        }
+      },
+      "reputation" : {
+        "wow_wotlk_3.3.5a" : {
+          "1005" : 0,
+          "1011" : 0,
+          "1012" : 0,
+          "1015" : 0,
+          "1031" : 0,
+          "1037" : 0,
+          "1038" : 0,
+          "1050" : 0,
+          "1052" : 0,
+          "1064" : 0,
+          "1067" : 0,
+          "1068" : 0,
+          "1073" : 0,
+          "1077" : 0,
+          "1082" : 0,
+          "1085" : 0,
+          "1090" : 0,
+          "1091" : 0,
+          "1094" : 0,
+          "1097" : 0,
+          "1098" : 0,
+          "1104" : 0,
+          "1105" : 0,
+          "1106" : 0,
+          "1117" : 0,
+          "1118" : 0,
+          "1119" : 0,
+          "1124" : 0,
+          "1126" : 0,
+          "1136" : 0,
+          "1137" : 0,
+          "1154" : 0,
+          "1155" : 0,
+          "1156" : 0,
+          "169" : 0,
+          "21" : 0,
+          "270" : 0,
+          "289" : 0,
+          "349" : 0,
+          "369" : 0,
+          "46" : 0,
+          "469" : 0,
+          "47" : 0,
+          "470" : 0,
+          "471" : 0,
+          "509" : 0,
+          "510" : 0,
+          "529" : 0,
+          "530" : 0,
+          "54" : 0,
+          "549" : 0,
+          "550" : 0,
+          "551" : 0,
+          "569" : 0,
+          "570" : 0,
+          "571" : 0,
+          "574" : 0,
+          "576" : 0,
+          "577" : 0,
+          "589" : 0,
+          "59" : 0,
+          "609" : 0,
+          "67" : 0,
+          "68" : 0,
+          "69" : 0,
+          "70" : 0,
+          "72" : 0,
+          "729" : 0,
+          "730" : 0,
+          "749" : 0,
+          "76" : 0,
+          "809" : 0,
+          "81" : 0,
+          "83" : 0,
+          "86" : 0,
+          "87" : 0,
+          "889" : 0,
+          "890" : 0,
+          "891" : 0,
+          "892" : 0,
+          "909" : 0,
+          "910" : 0,
+          "911" : 0,
+          "92" : 0,
+          "922" : 0,
+          "93" : 0,
+          "930" : 0,
+          "932" : 0,
+          "933" : 0,
+          "934" : 0,
+          "935" : 0,
+          "936" : 0,
+          "941" : 0,
+          "942" : 0,
+          "946" : 0,
+          "947" : 0,
+          "948" : 0,
+          "949" : 0,
+          "952" : 0,
+          "967" : 0,
+          "970" : 0,
+          "978" : 0,
+          "980" : 0,
+          "989" : 0,
+          "990" : 0
+        }
+      },
+      "questsCompleted" : {
+        "wow_wotlk_3.3.5a" : [ ]
+      },
+      "talents" : {
+        "wow_wotlk_3.3.5a" : [ ]
+      },
+      "flags" : null
+    },
+    "pets" : [ ],
+    "hearthstone" : {
+      "namespace" : "wow_wotlk_3.3.5a",
+      "mapId" : 0,
+      "zoneId" : 1,
+      "zoneName" : "Dun Morogh",
+      "x" : -6240.0,
+      "y" : 331.0,
+      "z" : 383.0
+    },
+    "extensions" : null
+  },
+  "serverSignature" : "60bdc1a259e2c2673c99dd5a2c7bd4ee2b2bfd0233468d4be560d2fa8f59a4327430f287ac2078e68d842fd63c936821febac9ca3da565ea1e4fc925f7447d09",
+  "playerSignature" : "ffee6cb9ee23f0f08255943294282302aa4df5b5aca8d5021005ef4abf0822b32d0bec364a70153f37cbc8766c04d735dbb277c5025fe70b8ab4991df612160a"
+}

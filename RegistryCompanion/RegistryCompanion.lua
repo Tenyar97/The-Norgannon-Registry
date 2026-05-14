@@ -1,3 +1,7 @@
+-- RegistryCompanion.lua
+-- Core addon logic.
+-- Sends INIT on login; the server hook handles signing via the companion.
+-- No HTTP transport required in the game client.
 
 local ADDON_NAME    = "RegistryCompanion"
 local ADDON_VERSION = "1.0.0"
@@ -6,6 +10,9 @@ local _, _, _, tocVersion = GetBuildInfo()
 local IS_VANILLA = (tocVersion <= 11200)
 local IS_WOTLK   = (tocVersion >= 30000)
 
+-- ============================================================
+-- State
+-- ============================================================
 
 RC = RC or {}
 
@@ -17,6 +24,9 @@ RC.state = {
     lastError       = nil,
 }
 
+-- ============================================================
+-- SavedVariables
+-- ============================================================
 
 local function initSavedVars()
     if not RegistryCompanionDB then
@@ -87,6 +97,9 @@ local function setPubkey(key)
     RC.state.pubkey = key
 end
 
+-- ============================================================
+-- Logging
+-- ============================================================
 
 local function log(msg)
     if DEFAULT_CHAT_FRAME then
@@ -100,6 +113,9 @@ local function logError(msg)
     end
 end
 
+-- ============================================================
+-- Login — send INIT, server handles the rest
+-- ============================================================
 
 function RC.initiateLogin()
     local pubkey     = RC.state.pubkey
@@ -131,6 +147,7 @@ function RC.initiateLogin()
         RC.state.authInProgress = false
     end
 
+    -- Timeout if no response
     C_Timer_After(15, function()
         if RC.state.authInProgress then
             RC.state.authInProgress = false
@@ -152,6 +169,9 @@ function RC.handleAuthRejected(reason)
     logError("Auth rejected: " .. (reason or "unknown reason"))
 end
 
+-- ============================================================
+-- Try to fetch pubkey from companion (optional — works if HTTP available)
+-- ============================================================
 
 local function tryFetchPubkey(callback)
     if not RC_Http or not RC_Http.isAvailable() then
@@ -163,6 +183,9 @@ local function tryFetchPubkey(callback)
     end)
 end
 
+-- ============================================================
+-- Incoming addon message handler
+-- ============================================================
 
 local function onAddonMessage(self, event, prefix, message, channel, sender)
     if prefix ~= "REGISTRY_AUTH" then return end
@@ -177,6 +200,9 @@ local function onAddonMessage(self, event, prefix, message, channel, sender)
     end
 end
 
+-- ============================================================
+-- C_Timer_After shim for Vanilla
+-- ============================================================
 
 if not C_Timer_After then
     C_Timer_After = function(delay, callback)
@@ -192,6 +218,9 @@ if not C_Timer_After then
     end
 end
 
+-- ============================================================
+-- Slash commands
+-- ============================================================
 
 SLASH_REGISTRYCOMPANION1 = "/registry"
 SLASH_REGISTRYCOMPANION2 = "/rc"
@@ -254,6 +283,9 @@ SlashCmdList["REGISTRYCOMPANION"] = function(cmd)
     end
 end
 
+-- ============================================================
+-- Event registration
+-- ============================================================
 
 local frame = CreateFrame("Frame", "RegistryCompanionFrame")
 
@@ -274,6 +306,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             RC.state.characterId = getCharacterId()
             RC.state.pubkey      = getPubkey()
 
+            -- Try to refresh pubkey from companion if HTTP is available
             if not RC.state.pubkey then
                 tryFetchPubkey(function(pk)
                     if pk then

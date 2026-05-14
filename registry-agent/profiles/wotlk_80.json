@@ -1,0 +1,21 @@
+{
+  "name": "wotlk_80",
+  "description": "For transferring characters between Wrath of the Lich King (3.3.5a) servers. Level capped at 80 to prevent importing level-hacked characters. No gold cap — WotLK endgame wealth is legitimately in the tens of thousands. Hearthstone excluded by default because different servers use different inn NPC IDs; enable it if both servers share an identical world database. Custom item templates enabled — cross-WotLK custom items can safely self-install via templateBlob. Add faction IDs to blocked_faction_ids to exclude Icecrown/Argent Tournament rep if the destination server lacks that content.",
+
+  "max_level": 80,
+  "max_gold_copper": 0,
+
+  "import_equipment":              true,
+  "import_inventory":              true,
+  "import_bank":                   true,
+  "import_pets":                   true,
+  "import_hearthstone":            false,
+  "import_skills":                 true,
+  "import_reputation":             true,
+  "import_quests_completed":       true,
+  "import_talents":                true,
+  "import_custom_item_templates":  true,
+
+  "blocked_skill_ids":   [],
+  "blocked_faction_ids": []
+}

@@ -17,6 +17,8 @@ public class AgentConfig {
 
 	private List<String> registryNodes;
 
+	private int customItemThreshold = 100_000;
+
 	public String getServerId() {
 		return serverId;
 	}
@@ -79,6 +81,14 @@ public class AgentConfig {
 
 	public void setRegistryNodes(List<String> v) {
 		this.registryNodes = v;
+	}
+
+	public int getCustomItemThreshold() {
+		return customItemThreshold;
+	}
+
+	public void setCustomItemThreshold(int customItemThreshold) {
+		this.customItemThreshold = customItemThreshold;
 	}
 
 	public void validate() {

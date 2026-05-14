@@ -13,8 +13,7 @@ import java.util.Map;
 
 public abstract class BaseHandler {
 
-	protected static final ObjectMapper MAPPER = new ObjectMapper()
-			.configure(SerializationFeature.INDENT_OUTPUT, false)
+	protected static final ObjectMapper MAPPER = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, false)
 			.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 

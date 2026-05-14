@@ -1,92 +1,106 @@
 package org.registrynode.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InventoryItem {
 
-    private String location;
-    private int bag;
-    private int slot;
-    private long itemGuid;
-    private String namespace;
-    private String refId;
-    private int count;
-    private int durability;
+	private String location;
+	private int bag;
+	private int slot;
+	private long itemGuid;
+	private String namespace;
+	private String refId;
+	private int count;
+	private int durability;
 
-    public InventoryItem() {
-    }
+	private String templateBlob;
 
-    public InventoryItem(String location, int bag, int slot, long itemGuid,
-                         String namespace, String refId, int count, int durability) {
-        this.location = location;
-        this.bag = bag;
-        this.slot = slot;
-        this.itemGuid = itemGuid;
-        this.namespace = namespace;
-        this.refId = refId;
-        this.count = count;
-        this.durability = durability;
-    }
+	public InventoryItem() {
+	}
 
-    public String getLocation() {
-        return location;
-    }
+	public InventoryItem(String location, int bag, int slot, long itemGuid, String namespace, String refId, int count,
+			int durability, String templateBlob) {
+		this.location = location;
+		this.bag = bag;
+		this.slot = slot;
+		this.itemGuid = itemGuid;
+		this.namespace = namespace;
+		this.refId = refId;
+		this.count = count;
+		this.durability = durability;
+		this.templateBlob = templateBlob;
+	}
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+	public String getLocation() {
+		return location;
+	}
 
-    public int getBag() {
-        return bag;
-    }
+	public void setLocation(String location) {
+		this.location = location;
+	}
 
-    public void setBag(int bag) {
-        this.bag = bag;
-    }
+	public int getBag() {
+		return bag;
+	}
 
-    public int getSlot() {
-        return slot;
-    }
+	public void setBag(int bag) {
+		this.bag = bag;
+	}
 
-    public void setSlot(int slot) {
-        this.slot = slot;
-    }
+	public int getSlot() {
+		return slot;
+	}
 
-    public long getItemGuid() {
-        return itemGuid;
-    }
+	public void setSlot(int slot) {
+		this.slot = slot;
+	}
 
-    public void setItemGuid(long itemGuid) {
-        this.itemGuid = itemGuid;
-    }
+	public long getItemGuid() {
+		return itemGuid;
+	}
 
-    public String getNamespace() {
-        return namespace;
-    }
+	public void setItemGuid(long itemGuid) {
+		this.itemGuid = itemGuid;
+	}
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
+	public String getNamespace() {
+		return namespace;
+	}
 
-    public String getRefId() {
-        return refId;
-    }
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
 
-    public void setRefId(String refId) {
-        this.refId = refId;
-    }
+	public String getRefId() {
+		return refId;
+	}
 
-    public int getCount() {
-        return count;
-    }
+	public void setRefId(String refId) {
+		this.refId = refId;
+	}
 
-    public void setCount(int count) {
-        this.count = count;
-    }
+	public int getCount() {
+		return count;
+	}
 
-    public int getDurability() {
-        return durability;
-    }
+	public void setCount(int count) {
+		this.count = count;
+	}
 
-    public void setDurability(int durability) {
-        this.durability = durability;
-    }
+	public int getDurability() {
+		return durability;
+	}
+
+	public void setDurability(int durability) {
+		this.durability = durability;
+	}
+
+	public String getTemplateBlob() {
+		return templateBlob;
+	}
+
+	public void setTemplateBlob(String templateBlob) {
+		this.templateBlob = templateBlob;
+	}
 }

@@ -2,34 +2,70 @@ package org.registrynode.model;
 
 public class HearthstoneLocation {
 
-    private String namespace;
-    private int    mapId;
-    private int    zoneId;
-    private String zoneName;
-    private float  x;
-    private float  y;
-    private float  z;
+	private String namespace;
+	private int mapId;
+	private int zoneId;
+	private String zoneName;
+	private float x;
+	private float y;
+	private float z;
 
-    public HearthstoneLocation() {}
+	public HearthstoneLocation() {
+	}
 
-    public String getNamespace()                       { return namespace; }
-    public void   setNamespace(String namespace)       { this.namespace = namespace; }
+	public String getNamespace() {
+		return namespace;
+	}
 
-    public int  getMapId()             { return mapId; }
-    public void setMapId(int mapId)    { this.mapId = mapId; }
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
 
-    public int  getZoneId()              { return zoneId; }
-    public void setZoneId(int zoneId)    { this.zoneId = zoneId; }
+	public int getMapId() {
+		return mapId;
+	}
 
-    public String getZoneName()                    { return zoneName; }
-    public void   setZoneName(String zoneName)     { this.zoneName = zoneName; }
+	public void setMapId(int mapId) {
+		this.mapId = mapId;
+	}
 
-    public float getX()          { return x; }
-    public void  setX(float x)   { this.x = x; }
+	public int getZoneId() {
+		return zoneId;
+	}
 
-    public float getY()          { return y; }
-    public void  setY(float y)   { this.y = y; }
+	public void setZoneId(int zoneId) {
+		this.zoneId = zoneId;
+	}
 
-    public float getZ()          { return z; }
-    public void  setZ(float z)   { this.z = z; }
+	public String getZoneName() {
+		return zoneName;
+	}
+
+	public void setZoneName(String zoneName) {
+		this.zoneName = zoneName;
+	}
+
+	public float getX() {
+		return x;
+	}
+
+	public void setX(float x) {
+		this.x = x;
+	}
+
+	public float getY() {
+		return y;
+	}
+
+	public void setY(float y) {
+		this.y = y;
+	}
+
+	public float getZ() {
+		return z;
+	}
+
+	public void setZ(float z) {
+		this.z = z;
+	}
 }

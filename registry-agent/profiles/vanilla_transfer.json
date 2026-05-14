@@ -1,17 +1,18 @@
 {
   "name": "vanilla_transfer",
-  "description": "For transferring characters from a Vanilla (1-60) server. Caps level at 60 and gold at 100g. Talents are excluded because Vanilla talent trees do not map to Wrath specs. Everything else carries over.",
+  "description": "For transferring characters from a Vanilla (1-60) server to a WotLK server. Caps level at 60 and gold at 100g. Talents excluded — Vanilla trees do not map to Wrath specs. Hearthstone excluded — inn binding IDs differ between expansions. Custom item templates excluded — Vanilla-era custom entries are unlikely to be valid on a WotLK database.",
 
   "max_level": 60,
   "max_gold_copper": 1000000,
 
-  "import_equipment":       true,
-  "import_inventory":       true,
-  "import_bank":            true,
-  "import_pets":            true,
-  "import_hearthstone":     true,
-  "import_skills":          true,
-  "import_reputation":      true,
-  "import_quests_completed": true,
-  "import_talents":         false
+  "import_equipment":              true,
+  "import_inventory":              true,
+  "import_bank":                   true,
+  "import_pets":                   true,
+  "import_hearthstone":            false,
+  "import_skills":                 true,
+  "import_reputation":             true,
+  "import_quests_completed":       true,
+  "import_talents":                false,
+  "import_custom_item_templates":  false
 }

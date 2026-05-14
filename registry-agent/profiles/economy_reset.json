@@ -10,7 +10,8 @@
   "import_pets":             true,
   "import_hearthstone":      true,
   "import_skills":           true,
-  "import_reputation":       true,
-  "import_quests_completed": true,
-  "import_talents":          true
+  "import_reputation":             true,
+  "import_quests_completed":       true,
+  "import_talents":                true,
+  "import_custom_item_templates":  false
 }

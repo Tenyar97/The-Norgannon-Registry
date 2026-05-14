@@ -1,6 +1,7 @@
 package org.registryagent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.registryagent.auth.AuthServer;
 import org.registryagent.model.LoginSession;
@@ -198,7 +199,7 @@ public class AgentAuthServer {
 				Map.of("success", true, "character_id", characterId, "session_token", result.getSessionToken()));
 	}
 
-	private void handleLogin(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleLogin(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -235,7 +236,7 @@ public class AgentAuthServer {
 		sendJson(exchange, 200, Map.of("success", true, "session_token", sessionToken, "character_id", characterId));
 	}
 
-	private void handleSnapshotEvent(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleSnapshotEvent(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -263,7 +264,7 @@ public class AgentAuthServer {
 		sendJson(exchange, 200, Map.of("ok", true));
 	}
 
-	private void handleDebugSession(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleDebugSession(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -317,7 +318,9 @@ public class AgentAuthServer {
 		}
 	}
 
-	private void handleDebugEvent(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	// LOGIN|LOGOUT|HEARTBEAT|LEVEL_UP|ITEM_ACQUIRED|QUEST_COMPLETED|DEATH
+	
+	private void handleDebugEvent(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -345,7 +348,7 @@ public class AgentAuthServer {
 		sendJson(exchange, 200, Map.of("ok", true));
 	}
 
-	private void handleAdminImport(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleAdminImport(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -364,6 +367,10 @@ public class AgentAuthServer {
 			return;
 		}
 
+		// Resolve the import profile — supports:
+		//   "profile": "vanilla_transfer"   → loads profiles/vanilla_transfer.json
+		//   "profile": { ... }              → deserializes an inline profile object
+		//   (absent / null)                 → permissive, no restrictions
 		ImportProfile profile = resolveProfile(body.get("profile"));
 		String profileName = profile != null ? profile.getName() : "permissive";
 
@@ -386,10 +393,19 @@ public class AgentAuthServer {
 		}
 	}
 
+	/**
+	 * Resolve the "profile" field from an import request body.
+	 *
+	 * Accepted forms:
+	 *   String  → name of a file in profiles/ directory
+	 *   Map     → inline profile object (Jackson-deserialized)
+	 *   null    → no profile (returns null, caller treats as permissive)
+	 */
 	private ImportProfile resolveProfile(Object raw) {
 		if (raw == null) return null;
 
 		if (raw instanceof String name) {
+			// Named profile — look up from profiles/ directory
 			ImportProfile profile = profileLoader.load(name);
 			if (profile == null) {
 				log.warning("Import profile '" + name + "' not found in profiles/ — using permissive defaults");
@@ -398,6 +414,7 @@ public class AgentAuthServer {
 		}
 
 		if (raw instanceof Map<?, ?>) {
+			// Inline profile object embedded directly in the request
 			try {
 				return mapper.convertValue(raw, ImportProfile.class);
 			} catch (Exception e) {
@@ -410,6 +427,12 @@ public class AgentAuthServer {
 		return null;
 	}
 
+	// -------------------------------------------------------------------------
+	// Trust management endpoints
+	// -------------------------------------------------------------------------
+
+	// GET /admin/trust
+	// Response: { "trust_all": false, "count": 2, "servers": [ { "pub_key": "...", "label": "...", ... } ] }
 	private void handleTrustList(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
 		var servers = trustStore.list().stream()
 				.map(s -> Map.of(
@@ -425,12 +448,15 @@ public class AgentAuthServer {
 				"servers",   servers));
 	}
 
+	// POST /admin/trust
+	// Body: { "pub_key": "hex...", "label": "Friendly Name", "default_profile": "vanilla_transfer" }
+	// Response: { "ok": true, "message": "..." }
 	private void handleTrustAdd(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) { sendError(exchange, 400, "Invalid JSON"); return; }
 
 		String pubKey  = (String) body.get("pub_key");
-		String label   = (String) body.getOrDefault("label", "");
+		String label   = body.get("label") != null ? (String) body.get("label") : "";
 		String profile = (String) body.get("default_profile");
 
 		if (pubKey == null || pubKey.isBlank()) {
@@ -449,6 +475,9 @@ public class AgentAuthServer {
 						   + "This server is now in strict mode — only listed servers can be imported from."));
 	}
 
+	// DELETE /admin/trust
+	// Body: { "pub_key": "hex..." }
+	// Response: { "ok": true/false, "message": "..." }
 	private void handleTrustRemove(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) { sendError(exchange, 400, "Invalid JSON"); return; }

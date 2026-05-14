@@ -8,6 +8,8 @@ public interface ServerAdapter {
 
 	boolean writeCharacter(String characterId, CharacterPayload payload);
 
+	boolean importCharacter(String registryUuid, int accountId, CharacterPayload payload);
+
 	boolean characterExistsLocally(String characterId);
 
 	String getNamespace();

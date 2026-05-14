@@ -1,5 +1,7 @@
 package org.registryagent.adapter.trinitycore;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.registryagent.adapter.ServerAdapter;
@@ -8,9 +10,12 @@ import org.registryagent.model.Currency;
 import org.registryagent.model.HearthstoneLocation;
 import org.registryagent.model.Pet;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
+import java.util.Base64;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class TrinityCoreAdapter implements ServerAdapter {
 
@@ -19,6 +24,14 @@ public class TrinityCoreAdapter implements ServerAdapter {
 	public static final String NAMESPACE = "wow_wotlk_3.3.5a";
 
 	private final HikariDataSource dataSource;
+
+	private int customItemThreshold = 100_000;
+
+	private final ObjectMapper blobMapper = new ObjectMapper();
+
+	public void setCustomItemThreshold(int customItemThreshold) {
+		this.customItemThreshold = customItemThreshold;
+	}
 
 	public TrinityCoreAdapter(String jdbcUrl, String username, String password) {
 		HikariConfig config = new HikariConfig();
@@ -62,7 +75,14 @@ public class TrinityCoreAdapter implements ServerAdapter {
 	public boolean writeCharacter(String characterId, CharacterPayload payload) {
 		Integer guid = resolveGuid(characterId);
 		if (guid == null) {
-			log.warning("writeCharacter called but no local character mapped for: " + characterId);
+			log.warning("writeCharacter: no registry_character_map entry for " + characterId
+					+ " — character has never authenticated on this server");
+			return false;
+		}
+		if (!characterExists(guid)) {
+			log.warning("writeCharacter: registry_character_map maps " + characterId
+					+ " → guid=" + guid + " but no row exists in characters table"
+					+ " — the character may have been deleted after its last login");
 			return false;
 		}
 		try {
@@ -72,6 +92,199 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			log.severe("DB error writing character guid=" + guid + ": " + e.getMessage());
 			return false;
 		}
+	}
+
+	private boolean characterExists(int guid) {
+		String sql = "SELECT 1 FROM characters WHERE guid = ?";
+		try (Connection conn = dataSource.getConnection();
+		     PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, guid);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next();
+			}
+		} catch (SQLException e) {
+			log.severe("characterExists check failed for guid=" + guid + ": " + e.getMessage());
+			return false;
+		}
+	}
+
+	@Override
+	public boolean importCharacter(String registryUuid, int accountId, CharacterPayload payload) {
+		Integer guid = resolveGuid(registryUuid);
+
+		if (guid != null && characterExists(guid)) {
+			log.info("importCharacter: updating existing character guid=" + guid
+					+ " for registryUuid=" + registryUuid);
+			try {
+				updateFromPayload(guid, payload);
+				return true;
+			} catch (SQLException e) {
+				log.severe("importCharacter: DB error updating guid=" + guid + ": " + e.getMessage());
+				return false;
+			}
+		}
+
+		if (accountId <= 0) {
+			log.warning("importCharacter: " + registryUuid
+					+ " has no local character and no accountId was provided — cannot auto-create."
+					+ " Supply an Account ID to create the character automatically.");
+			return false;
+		}
+
+		try (Connection conn = dataSource.getConnection()) {
+			conn.setAutoCommit(false);
+			try {
+				int newGuid = createCharacterRow(conn, accountId, payload);
+
+				String mapSql = "INSERT INTO registry_character_map"
+						+ " (registry_uuid, char_guid) VALUES (?, ?)"
+						+ " ON DUPLICATE KEY UPDATE char_guid = VALUES(char_guid)";
+				try (PreparedStatement mp = conn.prepareStatement(mapSql)) {
+					mp.setString(1, registryUuid);
+					mp.setInt(2, newGuid);
+					mp.executeUpdate();
+				}
+				conn.commit();
+
+				log.info("importCharacter: created character guid=" + newGuid
+						+ " account=" + accountId
+						+ " registryUuid=" + registryUuid);
+
+				updateFromPayload(newGuid, payload);
+				return true;
+
+			} catch (SQLException e) {
+				conn.rollback();
+				log.severe("importCharacter: failed to create character for "
+						+ registryUuid + ": " + e.getMessage());
+				return false;
+			}
+		} catch (SQLException e) {
+			log.severe("importCharacter: connection error for " + registryUuid + ": " + e.getMessage());
+			return false;
+		}
+	}
+
+	private static final Set<Integer> ALLIANCE_RACES =
+			java.util.Set.of(1, 3, 4, 7, 11);
+
+	private static final float[] ALLIANCE_START = { 0, -8833.37f, 628.62f, 94.00f, 5.31f, 1519 };
+	private static final float[] HORDE_START    = { 1,  1676.35f, 1677.45f, 121.67f, 2.70f, 1637 };
+
+	private float[] startPosition(int raceId) {
+		return ALLIANCE_RACES.contains(raceId) ? ALLIANCE_START : HORDE_START;
+	}
+
+	private int createCharacterRow(Connection conn, int accountId, CharacterPayload payload)
+			throws SQLException {
+
+		CharacterIdentity id = payload.getIdentity();
+		if (id == null)
+			throw new SQLException("Cannot create character: payload has no identity section");
+
+		int raceId   = resolveRaceId(id);
+		int classId  = resolveClassId(id);
+		int genderId = TrinityCoreMaps.GENDER_REF_TO_ID.getOrDefault(id.getGender(), 0);
+
+		long money = 0L;
+		if (payload.getCurrency() != null && payload.getCurrency().getValues() != null) {
+			Long copper = payload.getCurrency().getValues().get("copper");
+			if (copper != null) money = copper;
+		}
+
+		float[] pos = startPosition(raceId); 
+
+		String emptyEquipCache =
+				"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0";
+
+		int newGuid;
+		try (Statement st = conn.createStatement();
+		     ResultSet maxRs = st.executeQuery(
+		             "SELECT IFNULL(MAX(guid), 0) + 1 FROM characters")) {
+			if (!maxRs.next())
+				throw new SQLException("Could not determine next character GUID");
+			newGuid = maxRs.getInt(1);
+		}
+
+		String sql =
+				"INSERT INTO characters ("
+				+ "  guid,"
+				+ "  account, name, race, class, gender, level, xp, money,"
+				+ "  skin, face, hairStyle, hairColor, facialStyle,"
+				+ "  bankSlots, restState, playerFlags,"
+				+ "  map, instance_id,"
+				+ "  position_x, position_y, position_z, orientation,"
+				+ "  taximask, online, cinematic, totaltime, leveltime,"
+				+ "  logout_time, is_logout_resting, rest_bonus,"
+				+ "  resettalents_cost, resettalents_time,"
+				+ "  trans_x, trans_y, trans_z, trans_o, transguid,"
+				+ "  extra_flags, stable_slots, at_login, zone, death_expire_time,"
+				+ "  taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints,"
+				+ "  yesterdayHonorPoints, totalKills, todayKills, yesterdayKills,"
+				+ "  chosenTitle, knownCurrencies, watchedFaction, drunk,"
+				+ "  health, power1, power2, power3, power4, power5, power6, power7,"
+				+ "  talentGroupsCount, activeTalentGroup,"
+				+ "  exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels,"
+				+ "  latency, innTriggerId"
+				+ ") VALUES ("
+				+ "  ?,?,?,?,?,?,?,0,?,"     
+				+ "  0,0,0,0,0,"              
+				+ "  0,1,0,"                  
+				+ "  ?,0,"                   
+				+ "  ?,?,?,?,"                
+				+ "  '',0,0,0,0,"         
+				+ "  0,0,0,"               
+				+ "  0,0,"                   
+				+ "  0,0,0,0,0,"             
+				+ "  0,0,0,?,0,"              
+				+ "  '',0,0,0,"               
+				+ "  0,0,0,0,"                
+				+ "  0,0,0,0,"                
+				+ "  1,0,0,0,0,0,0,0,"        
+				+ "  1,0,"                    
+				+ "  '',?,0,'',0,0,"           
+				+ "  0,0"                    
+				+ ")";
+
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			int p = 1;
+			ps.setInt(p++, newGuid);
+			ps.setInt(p++, accountId);
+			ps.setString(p++, id.getName());
+			ps.setInt(p++, raceId);
+			ps.setInt(p++, classId);
+			ps.setInt(p++, genderId);
+			ps.setInt(p++, id.getLevel());
+			ps.setLong(p++, money);
+			ps.setInt(p++, (int) pos[0]);   // map
+			ps.setFloat(p++, pos[1]);        // position_x
+			ps.setFloat(p++, pos[2]);        // position_y
+			ps.setFloat(p++, pos[3]);        // position_z
+			ps.setFloat(p++, pos[4]);        // orientation
+			ps.setInt(p++, (int) pos[5]);   // zone
+			ps.setString(p++, emptyEquipCache);
+			ps.executeUpdate();
+		}
+
+		return newGuid;
+	}
+
+	private int resolveRaceId(CharacterIdentity id) throws SQLException {
+		String ref = id.getRaceRef();
+		if (ref == null) throw new SQLException("Missing raceRef in identity payload");
+		Integer id2 = TrinityCoreMaps.RACE_REF_TO_ID.get(ref);
+		if (id2 != null) return id2;
+		try { return Integer.parseInt(ref); } catch (NumberFormatException ignored) {}
+		throw new SQLException("Unknown raceRef '" + ref + "' — not in TrinityCoreMaps and not numeric");
+	}
+
+	private int resolveClassId(CharacterIdentity id) throws SQLException {
+		String ref = id.getClassRef();
+		if (ref == null) throw new SQLException("Missing classRef in identity payload");
+		Integer id2 = TrinityCoreMaps.CLASS_REF_TO_ID.get(ref);
+		if (id2 != null) return id2;
+		try { return Integer.parseInt(ref); } catch (NumberFormatException ignored) {}
+		throw new SQLException("Unknown classRef '" + ref + "' — not in TrinityCoreMaps and not numeric");
 	}
 
 	private CharacterPayload buildPayload(int guid) throws SQLException {
@@ -113,11 +326,11 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				identity.setGender(TrinityCoreMaps.GENDER_ID_TO_REF.getOrDefault(genderId, "unknown"));
 
 				identity.setClassRef(TrinityCoreMaps.CLASS_ID_TO_REF.getOrDefault(classId, "unknown_" + classId));
-				identity.setClassNamespace(NAMESPACE);
+				identity.setClassNamespace(getNamespace());
 				identity.setClassLabel(capitalize(TrinityCoreMaps.CLASS_ID_TO_REF.getOrDefault(classId, "Unknown")));
 
 				identity.setRaceRef(TrinityCoreMaps.RACE_ID_TO_REF.getOrDefault(raceId, "unknown_" + raceId));
-				identity.setRaceNamespace(NAMESPACE);
+				identity.setRaceNamespace(getNamespace());
 				identity.setRaceLabel(capitalize(TrinityCoreMaps.RACE_ID_TO_REF.getOrDefault(raceId, "Unknown")));
 
 				return identity;
@@ -149,7 +362,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				}
 
 				if (!powers.isEmpty()) {
-					stats.setStatExtensions(Map.of(NAMESPACE, powers));
+					stats.setStatExtensions(Map.of(getNamespace(), powers));
 				}
 
 				return stats;
@@ -183,8 +396,8 @@ public class TrinityCoreAdapter implements ServerAdapter {
 					if (slot >= TrinityCoreMaps.SLOT_NAMES.length)
 						continue;
 
-					Equipment eq = new Equipment(TrinityCoreMaps.SLOT_NAMES[slot], NAMESPACE, String.valueOf(itemEntry),
-							null 
+					Equipment eq = new Equipment(TrinityCoreMaps.SLOT_NAMES[slot], getNamespace(), String.valueOf(itemEntry),
+							null
 					);
 					equipment.add(eq);
 				}
@@ -225,6 +438,9 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			}
 		}
 
+		Set<Integer> allEntries = rows.stream().map(ItemRow::itemEntry).collect(Collectors.toSet());
+		Map<Integer, String> blobByEntry = buildTemplateBlobMap(conn, allEntries);
+
 		List<InventoryItem> inventory = new ArrayList<>();
 		List<InventoryItem> bank = new ArrayList<>();
 
@@ -239,10 +455,11 @@ public class TrinityCoreAdapter implements ServerAdapter {
 					row.bag(),
 					row.slot(),
 					row.itemGuid(),
-					NAMESPACE,
+					getNamespace(),
 					String.valueOf(row.itemEntry()),
 					row.count(),
-					row.durability()
+					row.durability(),
+					blobByEntry.get(row.itemEntry())
 			);
 
 			if ("bank".equals(location)) {
@@ -300,7 +517,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				values.put("silver", silver);
 				values.put("copper_remainder", rem);
 
-				return new Currency(NAMESPACE, values);
+				return new Currency(getNamespace(), values);
 			}
 		}
 	}
@@ -309,10 +526,10 @@ public class TrinityCoreAdapter implements ServerAdapter {
 	private Progression readProgression(Connection conn, int guid) throws SQLException {
 		Progression progression = new Progression();
 
-		progression.setSkills(Map.of(NAMESPACE, readSkills(conn, guid)));
-		progression.setReputation(Map.of(NAMESPACE, readReputation(conn, guid)));
-		progression.setQuestsCompleted(Map.of(NAMESPACE, readCompletedQuests(conn, guid)));
-		progression.setTalents(Map.of(NAMESPACE, readTalents(conn, guid)));
+		progression.setSkills(Map.of(getNamespace(), readSkills(conn, guid)));
+		progression.setReputation(Map.of(getNamespace(), readReputation(conn, guid)));
+		progression.setQuestsCompleted(Map.of(getNamespace(), readCompletedQuests(conn, guid)));
+		progression.setTalents(Map.of(getNamespace(), readTalents(conn, guid)));
 
 		return progression;
 	}
@@ -406,7 +623,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 
 					Pet pet = new Pet(
 							rs.getString("name"),
-							NAMESPACE,
+							getNamespace(),
 							String.valueOf(rs.getInt("entry")),
 							rs.getInt("level"),
 							petTypeRef,
@@ -469,7 +686,6 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				if (payload.getPets() != null && !payload.getPets().isEmpty()) {
 					updatePets(conn, guid, payload.getPets());
 				}
-				// Import inventory, bank, and equipment — full replacement
 				List<InventoryItem> inv  = payload.getInventory();
 				List<InventoryItem> bank = payload.getBank();
 				List<Equipment>     equip = payload.getEquipment();
@@ -527,6 +743,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 	}
 
 	private void updateProgression(Connection conn, int guid, Progression progression) throws SQLException {
+
 		String ns = getNamespace();
 
 		Map<String, Map<String, Integer>> allSkills = progression.getSkills();
@@ -557,6 +774,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				updateTalents(conn, guid, talents);
 		}
 	}
+
 
 	private void updateSkills(Connection conn, int guid, Map<String, Integer> skills) throws SQLException {
 		String sql = "INSERT INTO character_skills (guid, skill, value, max)"
@@ -744,23 +962,45 @@ public class TrinityCoreAdapter implements ServerAdapter {
 		for (int i = 0; i < TrinityCoreMaps.SLOT_NAMES.length; i++) {
 			slotNameToId.put(TrinityCoreMaps.SLOT_NAMES[i], i);
 		}
+
+		int[] equipCacheEntries = new int[19]; 
+
 		if (equipment != null) {
 			for (Equipment eq : equipment) {
-				if (!getNamespace().equals(eq.getNamespace())) continue;
+				
+				if (eq.getNamespace() == null) continue;
 				Integer slotId = slotNameToId.get(eq.getSlot());
 				if (slotId == null) continue;
 				int itemEntry;
 				try { itemEntry = Integer.parseInt(eq.getRefId()); }
 				catch (NumberFormatException ignored) { continue; }
+				if (!ensureItemTemplateExists(conn, itemEntry, null)) {
+					log.warning("importInventory: skipping equipment slot=" + eq.getSlot()
+							+ " entry=" + itemEntry + " — not in item_template and no blob available");
+					continue;
+				}
 				long newGuid = nextGuid++;
 				try {
 					insertItemInstance(conn, newGuid, itemEntry, guid, 1, 0);
 					insertInventoryEntry(conn, guid, 0L, slotId, newGuid);
+					equipCacheEntries[slotId] = itemEntry; 
 				} catch (SQLException e) {
 					log.warning("importInventory: skipping equipment slot=" + eq.getSlot()
 							+ " entry=" + itemEntry + " — " + e.getMessage());
 				}
 			}
+		}
+
+		StringBuilder equipCache = new StringBuilder();
+		for (int i = 0; i < 19; i++) {
+			if (i > 0) equipCache.append(' ');
+			equipCache.append(equipCacheEntries[i]).append(' ').append(0);
+		}
+		try (PreparedStatement upd = conn.prepareStatement(
+				"UPDATE characters SET equipmentCache = ? WHERE guid = ?")) {
+			upd.setString(1, equipCache.toString());
+			upd.setInt(2, guid);
+			upd.executeUpdate();
 		}
 
 		for (InventoryItem item : allItems) {
@@ -771,6 +1011,11 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			int itemEntry;
 			try { itemEntry = Integer.parseInt(item.getRefId()); }
 			catch (NumberFormatException ignored) { continue; }
+			if (!ensureItemTemplateExists(conn, itemEntry, item.getTemplateBlob())) {
+				log.warning("importInventory: skipping top-level item entry=" + itemEntry
+						+ " slot=" + item.getSlot() + " — not in item_template and no blob available");
+				continue;
+			}
 			try {
 				insertItemInstance(conn, newGuid, itemEntry, guid, item.getCount(), item.getDurability());
 				insertInventoryEntry(conn, guid, 0L, item.getSlot(), newGuid);
@@ -794,6 +1039,12 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			int itemEntry;
 			try { itemEntry = Integer.parseInt(item.getRefId()); }
 			catch (NumberFormatException ignored) { continue; }
+			if (!ensureItemTemplateExists(conn, itemEntry, item.getTemplateBlob())) {
+				log.warning("importInventory: skipping bag content entry=" + itemEntry
+						+ " bag=" + item.getBag() + " slot=" + item.getSlot()
+						+ " — not in item_template and no blob available");
+				continue;
+			}
 			try {
 				insertItemInstance(conn, newGuid, itemEntry, guid, item.getCount(), item.getDurability());
 				insertInventoryEntry(conn, guid, newBagGuid, item.getSlot(), newGuid);
@@ -888,7 +1139,196 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			log.severe("Failed to register mapping: " + e.getMessage());
 		}
 	}
+	
+	private Map<Integer, String> buildTemplateBlobMap(Connection conn, Set<Integer> entries) {
+		Set<Integer> candidates = entries.stream()
+				.filter(e -> e >= customItemThreshold)
+				.collect(Collectors.toSet());
 
+		if (candidates.isEmpty()) return Collections.emptyMap();
+
+		String inClause = candidates.stream().map(String::valueOf).collect(Collectors.joining(","));
+
+		String sql =
+			"SELECT entry, `class`, subclass, name, displayid, Quality, bonding, description," +
+			"  InventoryType, AllowableClass, AllowableRace, ItemLevel, RequiredLevel," +
+			"  RequiredSkill, RequiredSkillRank, Material, sheath, StatsCount," +
+			"  stat_type1,  stat_value1,  stat_type2,  stat_value2," +
+			"  stat_type3,  stat_value3,  stat_type4,  stat_value4," +
+			"  stat_type5,  stat_value5,  stat_type6,  stat_value6," +
+			"  stat_type7,  stat_value7,  stat_type8,  stat_value8," +
+			"  stat_type9,  stat_value9,  stat_type10, stat_value10," +
+			"  dmg_min1, dmg_max1, dmg_type1, delay, armor," +
+			"  ContainerSlots, MaxCount, Stackable, BuyPrice, SellPrice," +
+			"  spellid_1, spelltrigger_1, spellcharges_1," +
+			"  spellid_2, spelltrigger_2, spellcharges_2," +
+			"  spellid_3, spelltrigger_3, spellcharges_3," +
+			"  spellid_4, spelltrigger_4, spellcharges_4," +
+			"  spellid_5, spelltrigger_5, spellcharges_5," +
+			"  Flags, FlagsExtra" +
+			" FROM item_template WHERE entry IN (" + inClause + ")";
+
+		Map<Integer, String> result = new HashMap<>();
+		try (Statement st = conn.createStatement();
+			 ResultSet rs = st.executeQuery(sql)) {
+			while (rs.next()) {
+				Map<String, Object> blob = new LinkedHashMap<>();
+				blob.put("class",            rs.getInt("class"));
+				blob.put("subclass",         rs.getInt("subclass"));
+				blob.put("name",             rs.getString("name"));
+				blob.put("displayid",        rs.getInt("displayid"));
+				blob.put("Quality",          rs.getInt("Quality"));
+				blob.put("bonding",          rs.getInt("bonding"));
+				blob.put("description",      rs.getString("description"));
+				blob.put("InventoryType",    rs.getInt("InventoryType"));
+				blob.put("AllowableClass",   rs.getInt("AllowableClass"));
+				blob.put("AllowableRace",    rs.getInt("AllowableRace"));
+				blob.put("ItemLevel",        rs.getInt("ItemLevel"));
+				blob.put("RequiredLevel",    rs.getInt("RequiredLevel"));
+				blob.put("RequiredSkill",    rs.getInt("RequiredSkill"));
+				blob.put("RequiredSkillRank",rs.getInt("RequiredSkillRank"));
+				blob.put("Material",         rs.getInt("Material"));
+				blob.put("sheath",           rs.getInt("sheath"));
+				blob.put("StatsCount",       rs.getInt("StatsCount"));
+				for (int i = 1; i <= 10; i++) {
+					blob.put("stat_type"  + i, rs.getInt("stat_type"  + i));
+					blob.put("stat_value" + i, rs.getInt("stat_value" + i));
+				}
+				blob.put("dmg_min1",         rs.getDouble("dmg_min1"));
+				blob.put("dmg_max1",         rs.getDouble("dmg_max1"));
+				blob.put("dmg_type1",        rs.getInt("dmg_type1"));
+				blob.put("delay",            rs.getInt("delay"));
+				blob.put("armor",            rs.getInt("armor"));
+				blob.put("ContainerSlots",   rs.getInt("ContainerSlots"));
+				blob.put("MaxCount",         rs.getInt("MaxCount"));
+				blob.put("Stackable",        rs.getInt("Stackable"));
+				blob.put("BuyPrice",         rs.getLong("BuyPrice"));
+				blob.put("SellPrice",        rs.getLong("SellPrice"));
+				for (int i = 1; i <= 5; i++) {
+					blob.put("spellid_"      + i, rs.getInt("spellid_"      + i));
+					blob.put("spelltrigger_" + i, rs.getInt("spelltrigger_" + i));
+					blob.put("spellcharges_" + i, rs.getInt("spellcharges_" + i));
+				}
+				blob.put("Flags",            rs.getInt("Flags"));
+				blob.put("FlagsExtra",       rs.getInt("FlagsExtra"));
+
+				try {
+					String json  = blobMapper.writeValueAsString(blob);
+					String b64   = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+					result.put(rs.getInt("entry"), b64);
+				} catch (Exception e) {
+					log.warning("buildTemplateBlobMap: failed to encode entry="
+							+ rs.getInt("entry") + ": " + e.getMessage());
+				}
+			}
+		} catch (SQLException e) {
+			log.warning("buildTemplateBlobMap: query failed — " + e.getMessage());
+		}
+		return result;
+	}
+
+	private boolean ensureItemTemplateExists(Connection conn, int itemEntry, String templateBlob) {
+		if (itemEntry < customItemThreshold) return true;
+
+		try (PreparedStatement ps = conn.prepareStatement(
+				"SELECT 1 FROM item_template WHERE entry = ? LIMIT 1")) {
+			ps.setInt(1, itemEntry);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) return true;
+			}
+		} catch (SQLException e) {
+			log.warning("ensureItemTemplateExists: lookup failed for entry=" + itemEntry
+					+ ": " + e.getMessage());
+			return false;
+		}
+
+		if (templateBlob == null) return false;
+
+		try {
+			byte[] bytes = Base64.getDecoder().decode(templateBlob);
+			Map<String, Object> data = blobMapper.readValue(bytes,
+					new TypeReference<Map<String, Object>>() {});
+			insertItemTemplate(conn, itemEntry, data);
+			log.info("Installed custom item_template entry=" + itemEntry);
+			return true;
+		} catch (Exception e) {
+			log.warning("ensureItemTemplateExists: failed to install template for entry="
+					+ itemEntry + ": " + e.getMessage());
+			return false;
+		}
+	}
+
+	private void insertItemTemplate(Connection conn, int entry, Map<String, Object> d)
+			throws SQLException {
+		String sql =
+			"INSERT IGNORE INTO item_template (" +
+			"  entry, `class`, subclass, name, displayid, Quality, bonding, description," +
+			"  InventoryType, AllowableClass, AllowableRace, ItemLevel, RequiredLevel," +
+			"  RequiredSkill, RequiredSkillRank, Material, sheath, StatsCount," +
+			"  stat_type1,  stat_value1,  stat_type2,  stat_value2," +
+			"  stat_type3,  stat_value3,  stat_type4,  stat_value4," +
+			"  stat_type5,  stat_value5,  stat_type6,  stat_value6," +
+			"  stat_type7,  stat_value7,  stat_type8,  stat_value8," +
+			"  stat_type9,  stat_value9,  stat_type10, stat_value10," +
+			"  dmg_min1, dmg_max1, dmg_type1, delay, armor," +
+			"  ContainerSlots, MaxCount, Stackable, BuyPrice, SellPrice," +
+			"  spellid_1, spelltrigger_1, spellcharges_1," +
+			"  spellid_2, spelltrigger_2, spellcharges_2," +
+			"  spellid_3, spelltrigger_3, spellcharges_3," +
+			"  spellid_4, spelltrigger_4, spellcharges_4," +
+			"  spellid_5, spelltrigger_5, spellcharges_5," +
+			"  Flags, FlagsExtra" +
+			") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			int p = 1;
+			ps.setInt(p++, entry);
+			ps.setInt(p++, intVal(d, "class"));
+			ps.setInt(p++, intVal(d, "subclass"));
+			ps.setString(p++, strVal(d, "name"));
+			ps.setInt(p++, intVal(d, "displayid"));
+			ps.setInt(p++, intVal(d, "Quality"));
+			ps.setInt(p++, intVal(d, "bonding"));
+			ps.setString(p++, strVal(d, "description"));
+			ps.setInt(p++, intVal(d, "InventoryType"));
+			ps.setInt(p++, intVal(d, "AllowableClass"));
+			ps.setInt(p++, intVal(d, "AllowableRace"));
+			ps.setInt(p++, intVal(d, "ItemLevel"));
+			ps.setInt(p++, intVal(d, "RequiredLevel"));
+			ps.setInt(p++, intVal(d, "RequiredSkill"));
+			ps.setInt(p++, intVal(d, "RequiredSkillRank"));
+			ps.setInt(p++, intVal(d, "Material"));
+			ps.setInt(p++, intVal(d, "sheath"));
+			ps.setInt(p++, intVal(d, "StatsCount"));
+			for (int i = 1; i <= 10; i++) {
+				ps.setInt(p++, intVal(d, "stat_type"  + i));
+				ps.setInt(p++, intVal(d, "stat_value" + i));
+			}
+			ps.setDouble(p++, dblVal(d, "dmg_min1"));
+			ps.setDouble(p++, dblVal(d, "dmg_max1"));
+			ps.setInt(p++,    intVal(d, "dmg_type1"));
+			ps.setInt(p++,    intVal(d, "delay"));
+			ps.setInt(p++,    intVal(d, "armor"));
+			ps.setInt(p++,    intVal(d, "ContainerSlots"));
+			ps.setInt(p++,    intVal(d, "MaxCount"));
+			ps.setInt(p++,    intVal(d, "Stackable"));
+			ps.setLong(p++,   longVal(d, "BuyPrice"));
+			ps.setLong(p++,   longVal(d, "SellPrice"));
+			for (int i = 1; i <= 5; i++) {
+				ps.setInt(p++, intVal(d, "spellid_"      + i));
+				ps.setInt(p++, intVal(d, "spelltrigger_" + i));
+				ps.setInt(p++, intVal(d, "spellcharges_" + i));
+			}
+			ps.setInt(p++, intVal(d, "Flags"));
+			ps.setInt(p,   intVal(d, "FlagsExtra"));
+			ps.executeUpdate();
+		}
+	}
+
+	private int    intVal(Map<String, Object> m, String k) { Object v = m.get(k); return v instanceof Number ? ((Number)v).intValue()    : 0;    }
+	private long   longVal(Map<String, Object> m, String k) { Object v = m.get(k); return v instanceof Number ? ((Number)v).longValue()   : 0L;   }
+	private double dblVal(Map<String, Object> m, String k)  { Object v = m.get(k); return v instanceof Number ? ((Number)v).doubleValue() : 0.0;  }
+	private String strVal(Map<String, Object> m, String k)  { Object v = m.get(k); return v != null ? String.valueOf(v) : "";                      }
 
 	private String capitalize(String s) {
 		if (s == null || s.isEmpty())

@@ -2,6 +2,7 @@ package org.registryagent.adapter.trinitycore;
 
 import java.util.Map;
 
+//Lookup maps for TrinityCore 3.3.5a class and race IDs.
 public class TrinityCoreMaps {
 
 	public static final Map<Integer, String> CLASS_ID_TO_REF = Map.ofEntries(Map.entry(1, "warrior"),

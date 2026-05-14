@@ -9,6 +9,15 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Guards against silent signature-verification failures caused by field drift
+ * between the agent and node copies of CharacterPayload.
+ *
+ * When you add, remove, or rename a field:
+ *   1. Update CharacterPayload in BOTH modules.
+ *   2. Update the expected set below AND the matching set in
+ *      registry-agent's CharacterPayloadMirrorTest.
+ */
 class CharacterPayloadMirrorTest {
 
     private static final Set<String> EXPECTED_FIELDS = Set.of(

@@ -11,9 +11,14 @@ import org.registryagent.auth.KeyVerifier;
 import org.registryagent.registry.NodeTransport;
 import org.registryagent.registry.RegistryClient;
 import org.registryagent.registry.SnapshotVerifier;
+import org.registryagent.snapshot.ImportProfileLoader;
 import org.registryagent.snapshot.ServerSigner;
 import org.registryagent.snapshot.SnapshotAgent;
 import org.registryagent.snapshot.SnapshotBuilder;
+import org.registryagent.ui.AdminImportPanel;
+
+import javax.swing.*;
+import java.awt.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,8 +43,9 @@ public class Main
 		}
 
 		switch (args[0]) {
-		case "init" -> runInit(args);
-		case "start" -> runStart(args);
+		case "init"      -> runInit(args);
+		case "start"     -> runStart(args);
+		case "admin-gui" -> runAdminGui(args);
 		default -> {
 			printUsage();
 			System.exit(1);
@@ -166,7 +172,7 @@ public class Main
 	}
 
 	private static ServerAdapter buildAdapter(AgentConfig config) {
-		return switch (config.getDbAdapter()) {
+		TrinityCoreAdapter adapter = switch (config.getDbAdapter()) {
 		case "trinitycore_3.3.5a" ->
 			new TrinityCoreAdapter(config.getDbUrl(), config.getDbUsername(), config.getDbPassword());
 		case "azerothcore_3.3.5a" ->
@@ -174,6 +180,8 @@ public class Main
 		default -> throw new IllegalStateException("Unknown adapter: '" + config.getDbAdapter() + "'. "
 				+ "Supported: trinitycore_3.3.5a, azerothcore_3.3.5a");
 		};
+		adapter.setCustomItemThreshold(config.getCustomItemThreshold());
+		return adapter;
 	}
 
 	private static AgentConfig loadConfig(String path) throws Exception {
@@ -189,6 +197,70 @@ public class Main
 		return yaml.readValue(configFile, AgentConfig.class);
 	}
 
+	private static void runAdminGui(String[] args) throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			log.severe("admin-gui requires a display. "
+					+ "Run 'registry-agent start' for headless operation.");
+			System.exit(1);
+		}
+
+		try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
+		catch (Exception ignored) {}
+
+		String configPath = args.length > 1 ? args[1] : "./config.yaml";
+		log.info("Loading config from: " + configPath + " (admin-gui mode)");
+
+		AgentConfig config = loadConfig(configPath);
+		config.validate();
+
+		log.info("Starting registry-agent (admin-gui) — serverId=" + config.getServerId());
+
+		KeyVerifier      keyVerifier      = new KeyVerifier();
+		ServerSigner     serverSigner     = new ServerSigner(
+				Path.of(config.getPrivateKeyPath()),
+				Path.of(config.getPublicKeyPath()));
+		SnapshotVerifier snapshotVerifier = new SnapshotVerifier(keyVerifier);
+		NodeTransport    nodeTransport    = new NodeTransport(snapshotVerifier);
+		RegistryClient   registryClient  = new RegistryClient(config.getRegistryNodes(), nodeTransport);
+		ChallengeManager challengeManager = new ChallengeManager();
+		authServer       = new AuthServer(challengeManager, keyVerifier, registryClient);
+
+		ServerAdapter adapter = buildAdapter(config);
+		SnapshotBuilder snapshotBuilder = new SnapshotBuilder(config.getServerId(), serverSigner);
+		snapshotAgent   = new SnapshotAgent(authServer, adapter, snapshotBuilder, registryClient);
+
+		ImportProfileLoader profileLoader = new ImportProfileLoader();
+		snapshotAgent.setProfileLoader(profileLoader);
+
+		agentAuthServer = new AgentAuthServer(authServer, snapshotAgent, config.getServerId());
+		agentAuthServer.start();
+
+		dbQueueProcessor = new DbQueueProcessor(agentAuthServer, snapshotAgent,
+				config.getDbUrl(), config.getDbUsername(), config.getDbPassword());
+		dbQueueProcessor.start();
+
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			log.info("Shutdown signal received — flushing agent...");
+			dbQueueProcessor.shutdown();
+			snapshotAgent.shutdown();
+			agentAuthServer.stop();
+			challengeManager.shutdown();
+			registryClient.shutdown();
+			log.info("Shutdown complete.");
+		}, "shutdown-hook"));
+
+		log.info("Agent ready — opening admin GUI");
+
+		SwingUtilities.invokeLater(() -> new AdminImportPanel(
+				snapshotAgent,
+				profileLoader,
+				config.getServerId(),
+				adapter.getNamespace(),
+				config.getRegistryNodes().size()));
+
+		Thread.currentThread().join();
+	}
+
 	private static void printUsage() {
 		System.out.println("""
 				registry-agent — WoW private server character registry
@@ -197,6 +269,8 @@ public class Main
 				  registry-agent init              Generate keypair and skeleton config
 				  registry-agent start             Start agent using ./config.yaml
 				  registry-agent start <path>      Start agent using a custom config path
+				  registry-agent admin-gui          Start agent + open admin import GUI
+				  registry-agent admin-gui <path>  Start agent + GUI using a custom config path
 
 				Run 'init' once before first use.
 				""");
