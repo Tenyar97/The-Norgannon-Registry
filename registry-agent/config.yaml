@@ -1,0 +1,17 @@
+server_id: "REPLACE_WITH_GENERATED_UUID"
+
+keys:
+  private_key_path: "./keys/server.pem"
+  public_key_path:  "./keys/server.pub"
+
+database:
+  url:      "jdbc:mysql://localhost:3306/characters"
+  username: "trinity"
+  password: "trinity"
+
+  adapter:  "trinitycore_3.3.5a"
+
+registry:
+  nodes:
+    - "http://node1.example.com:8080"
+    - "http://node2.example.com:8080"

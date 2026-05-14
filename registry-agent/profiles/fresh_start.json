@@ -1,0 +1,17 @@
+{
+  "name": "fresh_start",
+  "description": "Carry over quests completed and reputation only. No items, no gold, no pets, no talents, no skills. Intended for economy resets or seasonal servers where players start fresh but keep their story progress.",
+
+  "max_level": 1,
+  "max_gold_copper": 1,
+
+  "import_equipment":        false,
+  "import_inventory":        false,
+  "import_bank":             false,
+  "import_pets":             false,
+  "import_hearthstone":      false,
+  "import_skills":           false,
+  "import_reputation":       true,
+  "import_quests_completed": true,
+  "import_talents":          false
+}

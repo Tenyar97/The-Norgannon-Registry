@@ -1,0 +1,21 @@
+# registry-node configuration
+
+node:
+  # Port to listen on — must be open in your firewall
+  port: 8080
+
+  # Directory to store character JSON files
+  # Will be created if it doesn't exist
+  data_dir: "./data"
+
+  # Your node's publicly reachable URL
+  # Sent to peers so they can discover and add you automatically
+  # Leave blank if you don't want to advertise this node
+  public_url: "http://your-domain-or-ip:8080"
+
+# Known peer nodes
+# Add as many as you know about — the network grows from here
+# A single-node setup (no peers) is valid for testing
+peers:
+  - "http://node1.example.com:8080"
+  - "http://node2.example.com:8080"

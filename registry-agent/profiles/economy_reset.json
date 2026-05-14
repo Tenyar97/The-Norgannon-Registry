@@ -1,0 +1,16 @@
+{
+  "name": "economy_reset",
+  "description": "Level, skills, reputation, quests, talents, pets, and hearthstone carry over. Gold and all items are wiped. Intended for servers doing a fresh economy wipe without resetting character progression.",
+
+  "max_gold_copper": 1,
+
+  "import_equipment":        false,
+  "import_inventory":        false,
+  "import_bank":             false,
+  "import_pets":             true,
+  "import_hearthstone":      true,
+  "import_skills":           true,
+  "import_reputation":       true,
+  "import_quests_completed": true,
+  "import_talents":          true
+}

@@ -1,0 +1,17 @@
+{
+  "name": "vanilla_transfer",
+  "description": "For transferring characters from a Vanilla (1-60) server. Caps level at 60 and gold at 100g. Talents are excluded because Vanilla talent trees do not map to Wrath specs. Everything else carries over.",
+
+  "max_level": 60,
+  "max_gold_copper": 1000000,
+
+  "import_equipment":       true,
+  "import_inventory":       true,
+  "import_bank":            true,
+  "import_pets":            true,
+  "import_hearthstone":     true,
+  "import_skills":          true,
+  "import_reputation":      true,
+  "import_quests_completed": true,
+  "import_talents":         false
+}

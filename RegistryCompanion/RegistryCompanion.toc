@@ -1,0 +1,13 @@
+## Interface: 30300
+## Title: Registry Companion
+## Notes: Preserves your character across private servers. Requires the Registry Companion desktop app.
+## Author: registry-companion
+## Version: 1.0.0
+## SavedVariables: RegistryCompanionDB
+
+## X-Website: https://github.com/someorg/registry-companion
+## X-Compatible-Interface: 11200,30300
+
+Http.lua
+RegistryCompanion.lua
+LoginScreen.lua

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.registrycompanion</groupId>
+    <artifactId>registry-companion</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>registry-companion</name>
+    <description>
+        System tray companion for the WoW private server character registry.
+        Manages the player's Ed25519 keypair, signs authentication challenges,
+        and exposes a localhost HTTP API for the WoW addon to consume.
+        Windows only. Ships as a single executable fat JAR.
+    </description>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <jackson.version>2.19.0</jackson.version>
+        <bouncycastle.version>1.82</bouncycastle.version>
+
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+        <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
+        <launch4j.plugin.version>2.5.1</launch4j.plugin.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>--add-exports=jdk.httpserver/com.sun.net.httpserver=ALL-UNNAMED</arg>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:-serial</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>shaded</shadedClassifierName>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/LICENSE*</exclude>
+                                        <exclude>META-INF/NOTICE*</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.registrycompanion.Main</mainClass>
+                                    <manifestEntries>
+                                        <Implementation-Title>registry-companion</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Add-Opens>jdk.httpserver/com.sun.net.httpserver</Add-Opens>
+                                    </manifestEntries>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                            </transformers>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>${launch4j.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>wrap-exe</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+
+                            <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>
+
+                            <outfile>${project.build.directory}/RegistryCompanion.exe</outfile>
+
+                            <headerType>gui</headerType>
+
+                            <mainClassName>org.registrycompanion.Main</mainClassName>
+
+                            <jre>
+                                <minVersion>21</minVersion>
+                                <path>%JAVA_HOME%;%PATH%</path>
+                            </jre>
+
+                            <messages>
+                                <startupErr>An error occurred while starting Registry Companion.</startupErr>
+                                <jreNotFoundErr>Java 21 or later is required. Download it free from https://adoptium.net/</jreNotFoundErr>
+                                <jreVersionErr>Java 21 or later is required. Download it free from https://adoptium.net/</jreVersionErr>
+                                <launcherErr>Registry Companion could not be launched.</launcherErr>
+                            </messages>
+
+                            <singleInstance>
+                                <mutexName>RegistryCompanionMutex</mutexName>
+                                <windowTitle>Registry Companion</windowTitle>
+                            </singleInstance>
+
+                            <versionInfo>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>Registry Companion — WoW Character Registry</fileDescription>
+                                <copyright>Open Source — MIT License</copyright>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <productName>Registry Companion</productName>
+                                <internalName>registry-companion</internalName>
+                                <originalFilename>RegistryCompanion.exe</originalFilename>
+                            </versionInfo>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
