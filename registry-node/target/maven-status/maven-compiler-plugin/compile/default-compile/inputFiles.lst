@@ -2,6 +2,7 @@ C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\regis
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\gossip\PeerNode.java
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\handlers\BaseHandler.java
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\handlers\CharacterHandler.java
+C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\handlers\HealthHandler.java
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\handlers\PingHandler.java
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\handlers\SnapshotHandler.java
 C:\Users\Brady\eclipse-workspace\Norgannon\registry-node\src\main\java\org\registrynode\http\NodeServer.java

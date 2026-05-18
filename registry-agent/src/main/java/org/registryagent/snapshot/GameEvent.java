@@ -1,34 +1,26 @@
 package org.registryagent.snapshot;
 
-
 public enum GameEvent {
 
-    LEVEL_UP,
-    TALENT_CHANGE,
+	LEVEL_UP, TALENT_CHANGE,
 
-    ITEM_EQUIPPED,
-    ITEM_UNEQUIPPED,
-    ITEM_LOOTED,
+	ITEM_EQUIPPED, ITEM_UNEQUIPPED, ITEM_LOOTED,
 
-    QUEST_COMPLETED,
-    SKILL_GAINED,
-    REPUTATION_CHANGED,
+	QUEST_COMPLETED, SKILL_GAINED, REPUTATION_CHANGED,
 
-    
-    CURRENCY_CHANGED,
+	CURRENCY_CHANGED,
 
-    PET_TAMED,
+	PET_TAMED,
 
-    HEARTHSTONE_CHANGED,
+	HEARTHSTONE_CHANGED,
 
-    DEATH,
+	DEATH,
 
-    LOGIN,
-    LOGOUT,
+	LOGIN, LOGOUT,
 
-    HEARTBEAT;
+	HEARTBEAT;
 
-    public boolean isImmediate() {
-        return this == LOGIN || this == LOGOUT;
-    }
+	public boolean isImmediate() {
+		return this == LOGIN || this == LOGOUT;
+	}
 }

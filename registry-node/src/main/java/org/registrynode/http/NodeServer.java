@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.net.httpserver.HttpServer;
 import org.registrynode.gossip.GossipAgent;
 import org.registrynode.http.handlers.CharacterHandler;
+import org.registrynode.http.handlers.HealthHandler;
 import org.registrynode.http.handlers.PingHandler;
 import org.registrynode.http.handlers.SnapshotHandler;
 import org.registrynode.storage.SnapshotStore;
@@ -40,6 +41,7 @@ public class NodeServer {
 		server.createContext("/characters", new CharacterHandler(store));
 
 		server.createContext("/ping", new PingHandler(store));
+		server.createContext("/health", new HealthHandler(store, gossip));
 
 		server.createContext("/status", exchange -> {
 			Map<String, Object> status = new LinkedHashMap<>();

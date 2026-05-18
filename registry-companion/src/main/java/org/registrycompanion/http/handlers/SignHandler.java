@@ -8,27 +8,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
-/**
- * Called by the addon during the login handshake after receiving a challenge.
- *
- * Request body: { "message": "random-nonce-from-server" }
- *
- * Response: 200 { "signature": "hex-encoded-ed25519-signature" } 400 { "error":
- * "Missing message field" } 503 { "error": "No key loaded" }
- *
- * Two signing modes:
- *
- * 1. Challenge signing — sign an arbitrary nonce { "message": "abc123..." } → {
- * "signature": "..." }
- *
- * 2. Auth token signing — authorize a server to push snapshots { "message":
- * "SERVER_AUTH", "server_id": "uuid-here" } → { "signature": "...",
- * "auth_token": "uuid:pubkey" }
- *
- * challenge signatures prove identity, auth token signatures authorize the
- * server to publish snapshots.
- *
- */
 public class SignHandler extends BaseHandler implements HttpHandler {
 
 	private static final Logger log = Logger.getLogger(SignHandler.class.getName());

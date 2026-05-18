@@ -4,9 +4,9 @@
   "playerPubKey" : "050216bdecbb27da9671afed814c2642cf29f3d19bd3eb322c8585bc329ed815",
   "serverId" : "1319cc70-796f-4085-96db-d1e7f7fe4a68",
   "serverPubKey" : "2c71dee3630145e88a913916f058c4c72136b226811dd0df88958969da8b2c7e",
-  "sequence" : 10,
+  "sequence" : 16,
   "createdAt" : "2026-05-14T21:06:51.214141Z",
-  "updatedAt" : "2026-05-14T22:55:15.701613200Z",
+  "updatedAt" : "2026-05-15T00:25:15.704793900Z",
   "payload" : {
     "identity" : {
       "name" : "Bankerman",

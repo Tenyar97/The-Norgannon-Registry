@@ -13,5 +13,5 @@ database:
 
 registry:
   nodes:
-    - "http://node1.example.com:8080"
+    - "https://node.norgannon-registry.com"
     - "http://node2.example.com:8080"

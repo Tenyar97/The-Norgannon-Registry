@@ -358,7 +358,7 @@ public class TrinityCoreAdapter implements ServerAdapter {
 				Map<String, Integer> powers = new LinkedHashMap<>();
 				addPowerIfNonZero(rs, powers, primaryPowerIdx);
 				if (classId == 6) {
-					addPowerIfNonZero(rs, powers, 6); // rune
+					addPowerIfNonZero(rs, powers, 6); // dk rune
 				}
 
 				if (!powers.isEmpty()) {
@@ -950,6 +950,14 @@ public class TrinityCoreAdapter implements ServerAdapter {
 		if (inventory != null) allItems.addAll(inventory);
 		if (bank != null)      allItems.addAll(bank);
 
+		// Slots 67-73 (bag=0) are bank bag container positions; bankSlots must be at least (highestOccupiedSlot - 66) or AzerothCore will evict the bags on login.
+		int bankSlotsNeeded = 0;
+		for (InventoryItem item : allItems) {
+			if (item.getBag() == 0 && item.getSlot() >= 67 && item.getSlot() <= 73) {
+				bankSlotsNeeded = Math.max(bankSlotsNeeded, item.getSlot() - 66);
+			}
+		}
+
 		Map<Long, Long> sourceToNewGuid = new HashMap<>();
 		for (InventoryItem item : allItems) {
 			long srcGuid = item.getItemGuid();
@@ -997,9 +1005,10 @@ public class TrinityCoreAdapter implements ServerAdapter {
 			equipCache.append(equipCacheEntries[i]).append(' ').append(0);
 		}
 		try (PreparedStatement upd = conn.prepareStatement(
-				"UPDATE characters SET equipmentCache = ? WHERE guid = ?")) {
+				"UPDATE characters SET equipmentCache = ?, bankSlots = ? WHERE guid = ?")) {
 			upd.setString(1, equipCache.toString());
-			upd.setInt(2, guid);
+			upd.setInt(2, bankSlotsNeeded);
+			upd.setInt(3, guid);
 			upd.executeUpdate();
 		}
 
@@ -1057,7 +1066,8 @@ public class TrinityCoreAdapter implements ServerAdapter {
 		log.info("importInventory complete — guid=" + guid
 				+ " equipment=" + (equipment != null ? equipment.size() : 0)
 				+ " inventory=" + (inventory != null ? inventory.size() : 0)
-				+ " bank=" + (bank != null ? bank.size() : 0));
+				+ " bank=" + (bank != null ? bank.size() : 0)
+				+ " bankSlots=" + bankSlotsNeeded);
 	}
 
 	private void insertItemInstance(Connection conn, long itemGuid, int itemEntry,

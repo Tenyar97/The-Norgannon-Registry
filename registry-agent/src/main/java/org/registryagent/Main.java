@@ -21,18 +21,18 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class Main 
-{
+public class Main {
 
 	private static final Logger log = Logger.getLogger(Main.class.getName());
 
-	public static AuthServer       authServer;
-	public static AgentAuthServer  agentAuthServer;
-	public static SnapshotAgent    snapshotAgent;
+	public static AuthServer authServer;
+	public static AgentAuthServer agentAuthServer;
+	public static SnapshotAgent snapshotAgent;
 	public static DbQueueProcessor dbQueueProcessor;
 
 	public static void main(String[] args) throws Exception {
@@ -43,8 +43,8 @@ public class Main
 		}
 
 		switch (args[0]) {
-		case "init"      -> runInit(args);
-		case "start"     -> runStart(args);
+		case "init" -> runInit(args);
+		case "start" -> runStart(args);
 		case "admin-gui" -> runAdminGui(args);
 		default -> {
 			printUsage();
@@ -89,7 +89,7 @@ public class Main
 				  - "http://node2.example.com:8080"
 				""".formatted(serverId);
 
-		java.nio.file.Files.writeString(configPath, skeleton);
+		Files.writeString(configPath, skeleton);
 
 		log.info("Skeleton config written to: " + configPath);
 		log.info("");
@@ -142,8 +142,8 @@ public class Main
 		agentAuthServer = new AgentAuthServer(authServer, snapshotAgent, config.getServerId());
 		agentAuthServer.start();
 
-		dbQueueProcessor = new DbQueueProcessor(agentAuthServer, snapshotAgent,
-				config.getDbUrl(), config.getDbUsername(), config.getDbPassword());
+		dbQueueProcessor = new DbQueueProcessor(agentAuthServer, snapshotAgent, config.getDbUrl(),
+				config.getDbUsername(), config.getDbPassword());
 		dbQueueProcessor.start();
 
 		log.info("DB queue processor ready");
@@ -199,13 +199,14 @@ public class Main
 
 	private static void runAdminGui(String[] args) throws Exception {
 		if (GraphicsEnvironment.isHeadless()) {
-			log.severe("admin-gui requires a display. "
-					+ "Run 'registry-agent start' for headless operation.");
+			log.severe("admin-gui requires a display. " + "Run 'registry-agent start' for headless operation.");
 			System.exit(1);
 		}
 
-		try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); }
-		catch (Exception ignored) {}
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ignored) {
+		}
 
 		String configPath = args.length > 1 ? args[1] : "./config.yaml";
 		log.info("Loading config from: " + configPath + " (admin-gui mode)");
@@ -215,19 +216,18 @@ public class Main
 
 		log.info("Starting registry-agent (admin-gui) — serverId=" + config.getServerId());
 
-		KeyVerifier      keyVerifier      = new KeyVerifier();
-		ServerSigner     serverSigner     = new ServerSigner(
-				Path.of(config.getPrivateKeyPath()),
+		KeyVerifier keyVerifier = new KeyVerifier();
+		ServerSigner serverSigner = new ServerSigner(Path.of(config.getPrivateKeyPath()),
 				Path.of(config.getPublicKeyPath()));
 		SnapshotVerifier snapshotVerifier = new SnapshotVerifier(keyVerifier);
-		NodeTransport    nodeTransport    = new NodeTransport(snapshotVerifier);
-		RegistryClient   registryClient  = new RegistryClient(config.getRegistryNodes(), nodeTransport);
+		NodeTransport nodeTransport = new NodeTransport(snapshotVerifier);
+		RegistryClient registryClient = new RegistryClient(config.getRegistryNodes(), nodeTransport);
 		ChallengeManager challengeManager = new ChallengeManager();
-		authServer       = new AuthServer(challengeManager, keyVerifier, registryClient);
+		authServer = new AuthServer(challengeManager, keyVerifier, registryClient);
 
 		ServerAdapter adapter = buildAdapter(config);
 		SnapshotBuilder snapshotBuilder = new SnapshotBuilder(config.getServerId(), serverSigner);
-		snapshotAgent   = new SnapshotAgent(authServer, adapter, snapshotBuilder, registryClient);
+		snapshotAgent = new SnapshotAgent(authServer, adapter, snapshotBuilder, registryClient);
 
 		ImportProfileLoader profileLoader = new ImportProfileLoader();
 		snapshotAgent.setProfileLoader(profileLoader);
@@ -235,8 +235,8 @@ public class Main
 		agentAuthServer = new AgentAuthServer(authServer, snapshotAgent, config.getServerId());
 		agentAuthServer.start();
 
-		dbQueueProcessor = new DbQueueProcessor(agentAuthServer, snapshotAgent,
-				config.getDbUrl(), config.getDbUsername(), config.getDbPassword());
+		dbQueueProcessor = new DbQueueProcessor(agentAuthServer, snapshotAgent, config.getDbUrl(),
+				config.getDbUsername(), config.getDbPassword());
 		dbQueueProcessor.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -251,12 +251,8 @@ public class Main
 
 		log.info("Agent ready — opening admin GUI");
 
-		SwingUtilities.invokeLater(() -> new AdminImportPanel(
-				snapshotAgent,
-				profileLoader,
-				config.getServerId(),
-				adapter.getNamespace(),
-				config.getRegistryNodes().size()));
+		SwingUtilities.invokeLater(() -> new AdminImportPanel(snapshotAgent, profileLoader, config.getServerId(),
+				adapter.getNamespace(), config.getRegistryNodes().size()));
 
 		Thread.currentThread().join();
 	}

@@ -129,7 +129,7 @@ public class AgentAuthServer {
 	}
 
 
-	private void handleChallenge(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleChallenge(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -160,7 +160,7 @@ public class AgentAuthServer {
 	}
 
 
-	private void handleVerify(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleVerify(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) {
 			sendError(exchange, 400, "Invalid JSON");
@@ -182,7 +182,7 @@ public class AgentAuthServer {
 
 		// First login
 		if (characterId == null) {
-			characterId = java.util.UUID.randomUUID().toString();
+			characterId = UUID.randomUUID().toString();
 		}
 
 		AuthServer.LoginResult result = authServer.handleChallengeResponse(playerPubKey, characterId, signature);
@@ -393,14 +393,6 @@ public class AgentAuthServer {
 		}
 	}
 
-	/**
-	 * Resolve the "profile" field from an import request body.
-	 *
-	 * Accepted forms:
-	 *   String  → name of a file in profiles/ directory
-	 *   Map     → inline profile object (Jackson-deserialized)
-	 *   null    → no profile (returns null, caller treats as permissive)
-	 */
 	private ImportProfile resolveProfile(Object raw) {
 		if (raw == null) return null;
 
@@ -427,12 +419,6 @@ public class AgentAuthServer {
 		return null;
 	}
 
-	// -------------------------------------------------------------------------
-	// Trust management endpoints
-	// -------------------------------------------------------------------------
-
-	// GET /admin/trust
-	// Response: { "trust_all": false, "count": 2, "servers": [ { "pub_key": "...", "label": "...", ... } ] }
 	private void handleTrustList(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
 		var servers = trustStore.list().stream()
 				.map(s -> Map.of(
@@ -448,9 +434,6 @@ public class AgentAuthServer {
 				"servers",   servers));
 	}
 
-	// POST /admin/trust
-	// Body: { "pub_key": "hex...", "label": "Friendly Name", "default_profile": "vanilla_transfer" }
-	// Response: { "ok": true, "message": "..." }
 	private void handleTrustAdd(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) { sendError(exchange, 400, "Invalid JSON"); return; }
@@ -474,11 +457,8 @@ public class AgentAuthServer {
 				"message", "Server '" + label + "' added to trust list. "
 						   + "This server is now in strict mode — only listed servers can be imported from."));
 	}
-
-	// DELETE /admin/trust
-	// Body: { "pub_key": "hex..." }
-	// Response: { "ok": true/false, "message": "..." }
-	private void handleTrustRemove(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	
+	private void handleTrustRemove(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) { sendError(exchange, 400, "Invalid JSON"); return; }
 
@@ -535,7 +515,7 @@ public class AgentAuthServer {
 		log.info("AgentAuthServer stopped");
 	}
 
-	private Map<?, ?> readJson(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private Map<?, ?> readJson(HttpExchange exchange) throws IOException {
 		try (InputStream is = exchange.getRequestBody()) {
 			String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			if (body.isBlank())
@@ -546,7 +526,7 @@ public class AgentAuthServer {
 		}
 	}
 
-	private void sendJson(com.sun.net.httpserver.HttpExchange exchange, int status, Object body) throws IOException {
+	private void sendJson(HttpExchange exchange, int status, Object body) throws IOException {
 		byte[] bytes = mapper.writeValueAsBytes(body);
 		exchange.getResponseHeaders().set("Content-Type", "application/json");
 		exchange.sendResponseHeaders(status, bytes.length);
@@ -555,7 +535,7 @@ public class AgentAuthServer {
 		}
 	}
 
-	private void sendError(com.sun.net.httpserver.HttpExchange exchange, int status, String message)
+	private void sendError(HttpExchange exchange, int status, String message)
 			throws IOException {
 		sendJson(exchange, status, Map.of("error", message));
 	}
