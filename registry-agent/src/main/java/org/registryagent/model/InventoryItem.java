@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class InventoryItem {
 
 	private String location;
-	private int bag;
+	private long bag;
 	private int slot;
 	private long itemGuid;
 	private String namespace;
@@ -16,11 +16,12 @@ public class InventoryItem {
 	private int durability;
 
 	private String templateBlob;
+	private String itemText;
 
 	public InventoryItem() {
 	}
 
-	public InventoryItem(String location, int bag, int slot, long itemGuid, String namespace, String refId, int count,
+	public InventoryItem(String location, long bag, int slot, long itemGuid, String namespace, String refId, int count,
 			int durability, String templateBlob) {
 		this.location = location;
 		this.bag = bag;
@@ -41,11 +42,11 @@ public class InventoryItem {
 		this.location = location;
 	}
 
-	public int getBag() {
+	public long getBag() {
 		return bag;
 	}
 
-	public void setBag(int bag) {
+	public void setBag(long bag) {
 		this.bag = bag;
 	}
 
@@ -103,5 +104,13 @@ public class InventoryItem {
 
 	public void setTemplateBlob(String templateBlob) {
 		this.templateBlob = templateBlob;
+	}
+
+	public String getItemText() {
+		return itemText;
+	}
+
+	public void setItemText(String itemText) {
+		this.itemText = itemText;
 	}
 }

@@ -47,19 +47,19 @@ public class CharacterHandler extends BaseHandler implements HttpHandler {
 		SnapshotRecord record = store.get(characterId);
 
 		if (record == null) {
-			log.fine("Record not found — characterId=" + characterId);
+			log.fine("Record not found - characterId=" + characterId);
 			sendNotFound(exchange);
 			return;
 		}
 
-		log.fine("Serving record — characterId=" + characterId + " sequence=" + record.getSequence());
+		log.fine("Serving record - characterId=" + characterId + " sequence=" + record.getSequence());
 
 		sendOk(exchange, record);
 	}
 
 	private void handleList(HttpExchange exchange) throws IOException {
 		List<String> ids = store.listCharacterIds();
-		log.fine("Serving character list — " + ids.size() + " entries");
+		log.fine("Serving character list - " + ids.size() + " entries");
 		sendOk(exchange, ids);
 	}
 }

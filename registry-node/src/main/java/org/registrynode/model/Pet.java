@@ -1,5 +1,7 @@
 package org.registrynode.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class Pet {
 
 	private String name;
@@ -11,6 +13,8 @@ public class Pet {
 	private int currentHealth;
 	private int currentMana;
 	private int happiness;
+	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+	private int sourceModelId;
 
 	public Pet() {
 	}
@@ -85,5 +89,13 @@ public class Pet {
 
 	public void setHappiness(int happiness) {
 		this.happiness = happiness;
+	}
+
+	public int getSourceModelId() {
+		return sourceModelId;
+	}
+
+	public void setSourceModelId(int sourceModelId) {
+		this.sourceModelId = sourceModelId;
 	}
 }

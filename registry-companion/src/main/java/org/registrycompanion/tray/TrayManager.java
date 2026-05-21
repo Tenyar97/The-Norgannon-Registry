@@ -110,7 +110,7 @@ public class TrayManager {
 			balloon("Registry Companion",
 					nowRegistered ? "Will now start automatically with Windows." : "Removed from Windows startup.",
 					TrayIcon.MessageType.INFO);
-			log.info("Startup registration toggled — now registered: " + nowRegistered);
+			log.info("Startup registration toggled - now registered: " + nowRegistered);
 		});
 		menu.add(startupItem);
 
@@ -223,7 +223,7 @@ public class TrayManager {
 	}
 
 	private String tooltipText() {
-		return keyManager.isReady() ? "Registry Companion — Ready" : "Registry Companion — Setup needed";
+		return keyManager.isReady() ? "Registry Companion - Ready" : "Registry Companion - Setup needed";
 	}
 
 	public void uninstall() {

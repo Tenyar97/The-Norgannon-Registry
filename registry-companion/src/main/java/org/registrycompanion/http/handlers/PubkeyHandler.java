@@ -26,7 +26,7 @@ public class PubkeyHandler extends BaseHandler implements HttpHandler {
 		}
 
 		if (!keyManager.isReady()) {
-			sendError(exchange, 503, "No key loaded — setup not complete");
+			sendError(exchange, 503, "No key loaded - setup not complete");
 			return;
 		}
 

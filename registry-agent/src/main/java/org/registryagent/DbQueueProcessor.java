@@ -41,7 +41,7 @@ public class DbQueueProcessor {
         conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
         ensureTables();
         scheduler.scheduleAtFixedRate(this::processQueues, 0, 500, TimeUnit.MILLISECONDS);
-        log.info("DbQueueProcessor started — polling every 500 ms");
+        log.info("DbQueueProcessor started - polling every 500 ms");
     }
 
     private void ensureTables() throws SQLException {
@@ -137,7 +137,7 @@ public class DbQueueProcessor {
                         upd.setInt(3, id);
                         upd.executeUpdate();
                     }
-                    log.info("Auth queue: ok — id=" + id + " charId=" + result.characterId());
+                    log.info("Auth queue: ok - id=" + id + " charId=" + result.characterId());
                 } else {
                     try (PreparedStatement upd = conn.prepareStatement(
                             "UPDATE registry_auth_queue SET status='reject', reject_reason=? WHERE id=?")) {
@@ -145,7 +145,7 @@ public class DbQueueProcessor {
                         upd.setInt(2, id);
                         upd.executeUpdate();
                     }
-                    log.warning("Auth queue: reject — id=" + id + " reason=" + result.reason());
+                    log.warning("Auth queue: reject - id=" + id + " reason=" + result.reason());
                 }
             }
         }
@@ -191,7 +191,7 @@ public class DbQueueProcessor {
                     snapshotAgent.onEvent(sessionToken, event);
                     log.fine("Event queue: fired " + eventName + " token=" + sessionToken.substring(0, 8) + "...");
                 } catch (IllegalArgumentException e) {
-                    log.warning("Event queue: unknown event '" + eventName + "' — skipping");
+                    log.warning("Event queue: unknown event '" + eventName + "' - skipping");
                 }
 
                 try (PreparedStatement mark = conn.prepareStatement(
@@ -206,7 +206,7 @@ public class DbQueueProcessor {
     private void reconnectIfNeeded() {
         try {
             if (conn == null || conn.isClosed()) {
-                log.warning("DB connection lost — reconnecting...");
+                log.warning("DB connection lost - reconnecting...");
                 conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
                 log.info("DB reconnected");
             }

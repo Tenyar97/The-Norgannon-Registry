@@ -134,7 +134,7 @@ public class GossipAgent {
 
 				RecordVerifier.VerificationResult result = verifier.verify(record);
 				if (!result.isValid()) {
-					log.warning("Sync: invalid record from peer " + peer.getBaseUrl() + " — " + result.getReason());
+					log.warning("Sync: invalid record from peer " + peer.getBaseUrl() + " - " + result.getReason());
 					continue;
 				}
 
@@ -146,7 +146,7 @@ public class GossipAgent {
 			}
 		}
 
-		log.info("Startup sync complete — fetched=" + totalFetched + " stored=" + totalStored);
+		log.info("Startup sync complete - fetched=" + totalFetched + " stored=" + totalStored);
 	}
 
 	private void healthCheck() {

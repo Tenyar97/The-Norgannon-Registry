@@ -1,6 +1,6 @@
 {
   "name": "tbc_70",
-  "description": "For transferring characters from a The Burning Crusade (1-70) server to a WotLK server. Caps level at 70 and gold at 500g — enough to cover TBC endgame wealth without flooding WotLK economy. Hearthstone excluded — Outland/Shattrath bindings are TBC-specific. Talents excluded — TBC trees do not map cleanly to Wrath dual-spec builds. Custom item templates excluded — TBC custom entries are unlikely to be valid on a WotLK item_template. Add WotLK-only skill IDs (e.g. Cold Weather Flying: 561) to blocked_skill_ids if TBC characters somehow carry them.",
+  "description": "For transferring characters from a The Burning Crusade (1-70) server to a WotLK server. Caps level at 70 and gold at 500g - enough to cover TBC endgame wealth without flooding WotLK economy. Hearthstone excluded - Outland/Shattrath bindings are TBC-specific. Talents excluded - TBC trees do not map cleanly to Wrath dual-spec builds. Custom item templates excluded - TBC custom entries are unlikely to be valid on a WotLK item_template. Add WotLK-only skill IDs (e.g. Cold Weather Flying: 561) to blocked_skill_ids if TBC characters somehow carry them.",
 
   "max_level": 70,
   "max_gold_copper": 5000000,

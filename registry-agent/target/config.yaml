@@ -1,0 +1,14 @@
+serverId: "1319cc70-796f-4085-96db-d1e7f7fe4a68"
+
+privateKeyPath: "./keys/server.pem"
+publicKeyPath: "./keys/server.pub"
+
+dbUrl: "jdbc:mysql://127.0.0.1:3306/acore_characters"
+dbUsername: "root"
+dbPassword: "root"
+dbAdapter: "azerothcore_3.3.5a"
+
+worldDbUrl: "jdbc:mysql://127.0.0.1:3306/acore_world"
+
+registryNodes:
+  - "https://node.norgannon-registry.com"

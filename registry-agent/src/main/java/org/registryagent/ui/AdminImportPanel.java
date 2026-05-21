@@ -12,6 +12,9 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -60,7 +63,7 @@ public class AdminImportPanel extends JFrame {
 
 	public AdminImportPanel(SnapshotAgent snapshotAgent, ImportProfileLoader profileLoader, String serverId,
 			String adapterNamespace, int nodeCount) {
-		super("Admin Import — registry-agent");
+		super("Admin Import - registry-agent");
 
 		this.snapshotAgent = snapshotAgent;
 		this.profileLoader = profileLoader;
@@ -69,9 +72,9 @@ public class AdminImportPanel extends JFrame {
 		this.nodeCount = nodeCount;
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new java.awt.event.WindowAdapter() {
+		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
+			public void windowClosing(WindowEvent e) {
 				int choice = JOptionPane.showConfirmDialog(AdminImportPanel.this,
 						"Close the admin panel?\n\nThe agent will keep running in the background.", "Close",
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -165,7 +168,7 @@ public class AdminImportPanel extends JFrame {
 		lc.gridy = fc.gridy = 0;
 		panel.add(fieldLabel("Character ID"), lc);
 		characterIdField = inputField();
-		characterIdField.setToolTipText("Registry UUID for this character — visible in the player's companion app.");
+		characterIdField.setToolTipText("Registry UUID for this character - visible in the player's companion app.");
 		panel.add(characterIdField, fc);
 
 		GridBagConstraints sc = new GridBagConstraints();
@@ -183,7 +186,7 @@ public class AdminImportPanel extends JFrame {
 		panel.add(fieldLabel("Player Pub Key"), lc);
 		pubKeyField = inputField();
 		pubKeyField.setToolTipText(
-				"Player's Ed25519 public key (64-char hex) — player copies this from their companion tray.");
+				"Player's Ed25519 public key (64-char hex) - player copies this from their companion tray.");
 		panel.add(pubKeyField, fc);
 
 		sc.gridy = 3;
@@ -256,8 +259,8 @@ public class AdminImportPanel extends JFrame {
 		c.gridy = 0;
 		JPanel capsRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 18, 0));
 		capsRow.setBackground(BG);
-		levelCapLabel = summaryLabel("Level cap: —");
-		goldCapLabel = summaryLabel("Gold cap: —");
+		levelCapLabel = summaryLabel("Level cap: -");
+		goldCapLabel = summaryLabel("Gold cap: -");
 		capsRow.add(levelCapLabel);
 		capsRow.add(goldCapLabel);
 		panel.add(capsRow, c);
@@ -336,7 +339,7 @@ public class AdminImportPanel extends JFrame {
 	private void refreshProfileCombo() {
 		String previous = (String) profileCombo.getSelectedItem();
 		profileCombo.removeAllItems();
-		profileCombo.addItem("(Permissive — no restrictions)");
+		profileCombo.addItem("(Permissive - no restrictions)");
 
 		List<String> names = profileLoader.listAvailable();
 		for (String name : names)
@@ -415,7 +418,7 @@ public class AdminImportPanel extends JFrame {
 
 		String profileName = currentProfile != null ? currentProfile.getName() : "permissive";
 		final int finalAccountId = accountId;
-		log.info("Admin import — characterId=" + characterId + " accountId=" + (accountId > 0 ? accountId : "none")
+		log.info("Admin import - characterId=" + characterId + " accountId=" + (accountId > 0 ? accountId : "none")
 				+ " profile=" + profileName);
 
 		new SwingWorker<Boolean, Void>() {
@@ -432,20 +435,20 @@ public class AdminImportPanel extends JFrame {
 					if (get()) {
 						String created = finalAccountId > 0 ? "\nAccount: " + finalAccountId + " (created if not found)"
 								: "";
-						setResult("✔  Import successful.\n" + "Character: " + characterId + created + "\n"
+						setResult("Import successful.\n" + "Character: " + characterId + created + "\n"
 								+ "Profile applied: " + profileName, GREEN);
 					} else {
 
-						setResult("✘  No snapshot found in registry.\n\n"
+						setResult("No snapshot found in registry.\n\n"
 								+ "The player must authenticate at least once with their companion app "
 								+ "before a snapshot is available to import.\n\n" + "Character ID: " + characterId,
 								RED);
 					}
 				} catch (ExecutionException ee) {
 					Throwable cause = ee.getCause() != null ? ee.getCause() : ee;
-					setResult("✘  Import failed.\n\n" + cause.getMessage(), RED);
+					setResult("Import failed.\n\n" + cause.getMessage(), RED);
 				} catch (Exception e) {
-					setResult("✘  Import error: " + e.getMessage(), RED);
+					setResult("Import error: " + e.getMessage(), RED);
 				}
 			}
 		}.execute();
@@ -521,7 +524,7 @@ public class AdminImportPanel extends JFrame {
 
 		field.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(java.awt.event.MouseEvent e) {
+			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2 && field.getText().isEmpty()) {
 					try {
 						String clip = (String) Toolkit.getDefaultToolkit().getSystemClipboard()

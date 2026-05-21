@@ -33,13 +33,13 @@ public class AuthServer {
 	public ChallengeResult requestChallenge(String playerPubKey, String characterId) {
 
 		if (!keyVerifier.isValidPublicKey(playerPubKey)) {
-			log.warning("Rejected login attempt — invalid public key format");
+			log.warning("Rejected login attempt - invalid public key format");
 			return ChallengeResult.rejected("Invalid public key format");
 		}
 
 		// BANHAMMER
 		if (bannedKeys.contains(playerPubKey)) {
-			log.info("Rejected login attempt — banned key: " + playerPubKey.substring(0, 8) + "...");
+			log.info("Rejected login attempt - banned key: " + playerPubKey.substring(0, 8) + "...");
 			return ChallengeResult.rejected("Account is banned");
 		}
 
@@ -54,7 +54,7 @@ public class AuthServer {
 
 		if (challenge == null) {
 			log.warning("No valid pending challenge for key: " + playerPubKey.substring(0, 8) + "...");
-			return LoginResult.rejected("No pending challenge — request a new one");
+			return LoginResult.rejected("No pending challenge - request a new one");
 		}
 
 		boolean valid = keyVerifier.verify(playerPubKey, challenge.getNonce(), signatureHex);
@@ -68,7 +68,7 @@ public class AuthServer {
 
 		if (!characterExists) {
 			log.info("No registry record found for characterId=" + characterId
-					+ " — will create new character on entry");
+					+ " - will create new character on entry");
 		}
 
 		String sessionToken = UUID.randomUUID().toString();
@@ -78,7 +78,7 @@ public class AuthServer {
 
 		activeSessions.put(sessionToken, session);
 
-		log.info("Login successful — characterId=" + characterId + " sessionToken=" + sessionToken.substring(0, 8)
+		log.info("Login successful - characterId=" + characterId + " sessionToken=" + sessionToken.substring(0, 8)
 				+ "...");
 
 		return LoginResult.success(sessionToken, characterExists);
@@ -95,7 +95,7 @@ public class AuthServer {
 	public void invalidateSession(String sessionToken) {
 		LoginSession session = activeSessions.remove(sessionToken);
 		if (session != null) {
-			log.info("Session invalidated — characterId=" + session.getCharacterId());
+			log.info("Session invalidated - characterId=" + session.getCharacterId());
 		}
 	}
 

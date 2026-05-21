@@ -13,6 +13,8 @@ public class Progression {
 
 	private Map<String, List<Integer>> talents;
 
+	private Map<String, List<Integer>> spells;
+
 	private Map<String, List<Integer>> flags;
 
 	public Progression() {
@@ -76,10 +78,24 @@ public class Progression {
 		return questsCompleted.get(namespace);
 	}
 
+	public Map<String, List<Integer>> getSpells() {
+		return spells;
+	}
+
+	public void setSpells(Map<String, List<Integer>> spells) {
+		this.spells = spells;
+	}
+
 	public List<Integer> getTalentsFor(String namespace) {
 		if (talents == null)
 			return null;
 		return talents.get(namespace);
+	}
+
+	public List<Integer> getSpellsFor(String namespace) {
+		if (spells == null)
+			return null;
+		return spells.get(namespace);
 	}
 
 	public List<Integer> getFlagsFor(String namespace) {

@@ -49,12 +49,12 @@ public class SnapshotBuilder {
 		String canonicalJson = toCanonicalJson(payload);
 		if (canonicalJson == null) {
 			throw new IllegalStateException(
-					"Failed to serialize payload for signing — characterId=" + session.getCharacterId());
+					"Failed to serialize payload for signing - characterId=" + session.getCharacterId());
 		}
 
 		record.setServerSignature(signer.sign(canonicalJson));
 
-		log.fine("Built snapshot — characterId=" + session.getCharacterId() + " sequence=" + record.getSequence());
+		log.fine("Built snapshot - characterId=" + session.getCharacterId() + " sequence=" + record.getSequence());
 
 		return record;
 	}

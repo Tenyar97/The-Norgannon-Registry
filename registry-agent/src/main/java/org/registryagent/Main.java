@@ -24,6 +24,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
@@ -36,6 +39,7 @@ public class Main {
 	public static DbQueueProcessor dbQueueProcessor;
 
 	public static void main(String[] args) throws Exception {
+		installColorLogger();
 
 		if (args.length == 0) {
 			printUsage();
@@ -84,6 +88,11 @@ public class Main {
 				dbPassword: "trinity"
 				dbAdapter:  "trinitycore_3.3.5a"
 
+				# World database (acore_world / trinity_world) - needed for pet model lookups and start positions
+				worldDbUrl:      "jdbc:mysql://localhost:3306/acore_world"
+				worldDbUsername: "trinity"
+				worldDbPassword: "trinity"
+
 				registryNodes:
 				  - "http://node1.example.com:8080"
 				  - "http://node2.example.com:8080"
@@ -94,7 +103,7 @@ public class Main {
 		log.info("Skeleton config written to: " + configPath);
 		log.info("");
 		log.info("Next steps:");
-		log.info("  1. Edit config.yaml — set your DB credentials and registry node URLs");
+		log.info("  1. Edit config.yaml - set your DB credentials and registry node URLs");
 		log.info("  2. Register your public key with the registry network");
 		log.info("  3. Run: registry-agent start");
 	}
@@ -106,7 +115,7 @@ public class Main {
 		AgentConfig config = loadConfig(configPath);
 		config.validate();
 
-		log.info("Starting registry-agent — serverId=" + config.getServerId());
+		log.info("Starting registry-agent - serverId=" + config.getServerId());
 
 		KeyVerifier keyVerifier = new KeyVerifier();
 
@@ -115,13 +124,13 @@ public class Main {
 
 		SnapshotVerifier snapshotVerifier = new SnapshotVerifier(keyVerifier);
 
-		log.info("Crypto layer ready — serverPubKey=" + serverSigner.getPublicKeyHex().substring(0, 8) + "...");
+		log.info("Crypto layer ready - serverPubKey=" + serverSigner.getPublicKeyHex().substring(0, 8) + "...");
 
 		NodeTransport nodeTransport = new NodeTransport(snapshotVerifier);
 
 		RegistryClient registryClient = new RegistryClient(config.getRegistryNodes(), nodeTransport);
 
-		log.info("Registry layer ready — " + config.getRegistryNodes().size() + " nodes configured");
+		log.info("Registry layer ready - " + config.getRegistryNodes().size() + " nodes configured");
 
 		ChallengeManager challengeManager = new ChallengeManager();
 
@@ -131,7 +140,7 @@ public class Main {
 
 		ServerAdapter adapter = buildAdapter(config);
 
-		log.info("Adapter ready — namespace=" + adapter.getNamespace());
+		log.info("Adapter ready - namespace=" + adapter.getNamespace());
 
 		SnapshotBuilder snapshotBuilder = new SnapshotBuilder(config.getServerId(), serverSigner);
 
@@ -149,7 +158,7 @@ public class Main {
 		log.info("DB queue processor ready");
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			log.info("Shutdown signal received — flushing agent...");
+			log.info("Shutdown signal received - flushing agent...");
 			dbQueueProcessor.shutdown();
 			snapshotAgent.shutdown();
 			agentAuthServer.stop();
@@ -180,6 +189,13 @@ public class Main {
 		default -> throw new IllegalStateException("Unknown adapter: '" + config.getDbAdapter() + "'. "
 				+ "Supported: trinitycore_3.3.5a, azerothcore_3.3.5a");
 		};
+		if (config.getWorldDbUrl() != null && !config.getWorldDbUrl().isBlank()) {
+			String worldUser = config.getWorldDbUsername() != null ? config.getWorldDbUsername() : config.getDbUsername();
+			String worldPass = config.getWorldDbPassword() != null ? config.getWorldDbPassword() : config.getDbPassword();
+			adapter.setWorldDatabase(config.getWorldDbUrl(), worldUser, worldPass);
+		} else {
+			log.warning("No world database configured - pet model lookups and start-position queries will be skipped.");
+		}
 		adapter.setCustomItemThreshold(config.getCustomItemThreshold());
 		return adapter;
 	}
@@ -214,7 +230,7 @@ public class Main {
 		AgentConfig config = loadConfig(configPath);
 		config.validate();
 
-		log.info("Starting registry-agent (admin-gui) — serverId=" + config.getServerId());
+		log.info("Starting registry-agent (admin-gui) - serverId=" + config.getServerId());
 
 		KeyVerifier keyVerifier = new KeyVerifier();
 		ServerSigner serverSigner = new ServerSigner(Path.of(config.getPrivateKeyPath()),
@@ -240,7 +256,7 @@ public class Main {
 		dbQueueProcessor.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			log.info("Shutdown signal received — flushing agent...");
+			log.info("Shutdown signal received - flushing agent...");
 			dbQueueProcessor.shutdown();
 			snapshotAgent.shutdown();
 			agentAuthServer.stop();
@@ -249,7 +265,7 @@ public class Main {
 			log.info("Shutdown complete.");
 		}, "shutdown-hook"));
 
-		log.info("Agent ready — opening admin GUI");
+		log.info("Agent ready - opening admin GUI");
 
 		SwingUtilities.invokeLater(() -> new AdminImportPanel(snapshotAgent, profileLoader, config.getServerId(),
 				adapter.getNamespace(), config.getRegistryNodes().size()));
@@ -257,9 +273,23 @@ public class Main {
 		Thread.currentThread().join();
 	}
 
+	private static void installColorLogger() {
+		Logger root = Logger.getLogger("");
+		for (Handler h : root.getHandlers()) {
+			root.removeHandler(h);
+		}
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(Level.ALL);
+		handler.setFormatter(new ColorConsoleFormatter());
+		root.addHandler(handler);
+		root.setLevel(Level.WARNING);
+		Logger.getLogger("org.registryagent").setLevel(Level.ALL);
+		Logger.getLogger("org.registrynode").setLevel(Level.ALL);
+	}
+
 	private static void printUsage() {
 		System.out.println("""
-				registry-agent — WoW private server character registry
+				registry-agent - WoW private server character registry
 
 				Usage:
 				  registry-agent init              Generate keypair and skeleton config

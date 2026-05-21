@@ -1,7 +1,9 @@
 package org.registryagent;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AgentConfig {
 
 	private String serverId;
@@ -12,6 +14,10 @@ public class AgentConfig {
 	private String dbUrl;
 	private String dbUsername;
 	private String dbPassword;
+
+	private String worldDbUrl;
+	private String worldDbUsername;
+	private String worldDbPassword;
 
 	private String dbAdapter = "trinitycore_3.3.5a";
 
@@ -65,6 +71,30 @@ public class AgentConfig {
 
 	public void setDbPassword(String v) {
 		this.dbPassword = v;
+	}
+
+	public String getWorldDbUrl() {
+		return worldDbUrl;
+	}
+
+	public void setWorldDbUrl(String v) {
+		this.worldDbUrl = v;
+	}
+
+	public String getWorldDbUsername() {
+		return worldDbUsername;
+	}
+
+	public void setWorldDbUsername(String v) {
+		this.worldDbUsername = v;
+	}
+
+	public String getWorldDbPassword() {
+		return worldDbPassword;
+	}
+
+	public void setWorldDbPassword(String v) {
+		this.worldDbPassword = v;
 	}
 
 	public String getDbAdapter() {

@@ -51,7 +51,7 @@ public class NodeTransport {
 
 			SnapshotVerifier.VerificationResult result = verifier.verify(record);
 			if (!result.isValid()) {
-				log.warning("Verification failed for record from " + node.getBaseUrl() + " — " + result.getReason());
+				log.warning("Verification failed for record from " + node.getBaseUrl() + " - " + result.getReason());
 				node.recordFailure();
 				return null;
 			}
@@ -80,8 +80,15 @@ public class NodeTransport {
 				return true;
 			}
 
-			log.warning("Node " + node.getBaseUrl() + " rejected snapshot: " + response.statusCode() + " "
-					+ response.body());
+			String rejection = response.body();
+			log.warning("Node " + node.getBaseUrl() + " rejected snapshot: " + response.statusCode() + " " + rejection);
+			if (rejection != null && rejection.contains("signature")) {
+				log.warning("Signature rejection - ensure this server's public key is registered with the node."
+						+ " serverId=" + record.getServerId()
+						+ " serverPubKey=" + (record.getServerPubKey() != null
+								? record.getServerPubKey().substring(0, Math.min(16, record.getServerPubKey().length())) + "..."
+								: "null"));
+			}
 			node.recordFailure();
 			return false;
 

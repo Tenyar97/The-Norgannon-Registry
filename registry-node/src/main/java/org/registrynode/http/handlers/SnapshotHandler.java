@@ -54,7 +54,7 @@ public class SnapshotHandler extends BaseHandler implements HttpHandler {
 
 		RecordVerifier.VerificationResult verification = verifier.verify(record);
 		if (!verification.isValid()) {
-			log.warning("Rejected record — " + verification.getReason() + " characterId="
+			log.warning("Rejected record - " + verification.getReason() + " characterId="
 					+ (record.getCharacterId() != null ? record.getCharacterId() : "unknown"));
 			sendBadRequest(exchange, "Verification failed: " + verification.getReason());
 			return;
@@ -64,7 +64,7 @@ public class SnapshotHandler extends BaseHandler implements HttpHandler {
 
 		switch (result) {
 		case STORED -> {
-			log.info("Stored record — characterId=" + record.getCharacterId() + " sequence=" + record.getSequence()
+			log.info("Stored record - characterId=" + record.getCharacterId() + " sequence=" + record.getSequence()
 					+ (isGossip(exchange) ? " [gossip]" : " [direct]"));
 
 			if (!isGossip(exchange)) {
@@ -75,15 +75,15 @@ public class SnapshotHandler extends BaseHandler implements HttpHandler {
 		}
 
 		case STALE -> {
-			log.fine("Stale record ignored — characterId=" + record.getCharacterId() + " incoming="
+			log.fine("Stale record ignored - characterId=" + record.getCharacterId() + " incoming="
 					+ record.getSequence() + " current=" + store.currentSequence(record.getCharacterId()));
 
 			sendOk(exchange, Map.of("result", "stale", "sequence", store.currentSequence(record.getCharacterId())));
 		}
 
 		case FAILED -> {
-			log.severe("Disk write failed — characterId=" + record.getCharacterId());
-			sendError(exchange, 500, "Storage error — disk write failed");
+			log.severe("Disk write failed - characterId=" + record.getCharacterId());
+			sendError(exchange, 500, "Storage error - disk write failed");
 		}
 		}
 	}

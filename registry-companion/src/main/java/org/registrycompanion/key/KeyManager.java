@@ -39,11 +39,11 @@ public class KeyManager {
 
 		if (Files.exists(keystorePath)) {
 			loadFromDisk(keystorePath);
-			log.info("Keypair loaded — pubkey=" + publicKeyHex.substring(0, 8) + "...");
+			log.info("Keypair loaded - pubkey=" + publicKeyHex.substring(0, 8) + "...");
 			return true;
 		}
 
-		log.info("No keystore found — first run, setup required");
+		log.info("No keystore found - first run, setup required");
 		return false;
 	}
 
@@ -57,7 +57,7 @@ public class KeyManager {
 		setKeypair(privKeyBytes);
 		saveToDisk(privKeyBytes);
 
-		log.info("New keypair generated — pubkey=" + publicKeyHex.substring(0, 8) + "...");
+		log.info("New keypair generated - pubkey=" + publicKeyHex.substring(0, 8) + "...");
 	}
 
 	public String sign(String nonce) {
@@ -86,7 +86,7 @@ public class KeyManager {
 		byte[] privKeyBytes = Bip39.decode(phrase);
 		setKeypair(privKeyBytes);
 		saveToDisk(privKeyBytes);
-		log.info("Keypair restored from recovery phrase — pubkey=" + publicKeyHex.substring(0, 8) + "...");
+		log.info("Keypair restored from recovery phrase - pubkey=" + publicKeyHex.substring(0, 8) + "...");
 	}
 
 	public String getPublicKeyHex() {

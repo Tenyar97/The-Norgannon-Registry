@@ -124,6 +124,8 @@ public class ImportProfileFilter {
 
 		out.setTalents(profile.isImportTalents() ? src.getTalents() : null);
 
+		out.setSpells(profile.isImportSpells() ? src.getSpells() : null);
+
 		out.setFlags(src.getFlags());
 
 		return out;

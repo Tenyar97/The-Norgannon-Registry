@@ -23,7 +23,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String configPath = args.length > 0 ? args[0] : "./config.yaml";
 
-        log.info("Starting registry-node — config=" + configPath);
+        log.info("Starting registry-node - config=" + configPath);
 
 
         NodeConfig config = loadConfig(configPath);
@@ -38,7 +38,7 @@ public class Main {
         SnapshotStore store = new SnapshotStore(dataDir);
         store.warmup();
 
-        log.info("SnapshotStore ready — " + store.size() + " records on disk");
+        log.info("SnapshotStore ready - " + store.size() + " records on disk");
 
 
         RecordVerifier verifier = new RecordVerifier();
@@ -100,7 +100,7 @@ public class Main {
 
         if (!configFile.exists()) {
             log.warning("Config file not found at " + path +
-                        " — using defaults (port=8080, data=./data, no peers)");
+                        " - using defaults (port=8080, data=./data, no peers)");
             return new NodeConfig();
         }
 

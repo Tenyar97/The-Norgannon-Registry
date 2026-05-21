@@ -1,6 +1,4 @@
-node:
-  port: 8080
-  data_dir: "./data"
-  public_url: "https://node.norgannon-registry.com"
-
+port: 8080
+dataDir: "./data"
+publicUrl: "https://node.norgannon-registry.com"
 peers: []

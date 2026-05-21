@@ -62,7 +62,7 @@ public class RecordVerifier {
 				record.getServerSignature());
 
 		if (!serverSigValid) {
-			log.warning("Server signature invalid — characterId=" + record.getCharacterId() + " serverPubKey="
+			log.warning("Server signature invalid - characterId=" + record.getCharacterId() + " serverPubKey="
 					+ abbrev(record.getServerPubKey()));
 			return fail("Server signature verification failed");
 		}
@@ -72,12 +72,12 @@ public class RecordVerifier {
 		boolean playerSigValid = keyVerifier.verify(record.getPlayerPubKey(), authToken, record.getPlayerSignature());
 
 		if (!playerSigValid) {
-			log.warning("Player signature invalid — characterId=" + record.getCharacterId() + " playerPubKey="
+			log.warning("Player signature invalid - characterId=" + record.getCharacterId() + " playerPubKey="
 					+ abbrev(record.getPlayerPubKey()));
 			return fail("Player signature verification failed");
 		}
 
-		log.fine("Record verified — characterId=" + record.getCharacterId() + " sequence=" + record.getSequence());
+		log.fine("Record verified - characterId=" + record.getCharacterId() + " sequence=" + record.getSequence());
 
 		return ok();
 	}

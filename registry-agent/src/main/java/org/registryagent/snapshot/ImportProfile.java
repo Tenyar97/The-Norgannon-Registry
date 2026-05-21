@@ -45,6 +45,9 @@ public class ImportProfile {
 	@JsonProperty("import_talents")
 	private boolean importTalents = true;
 
+	@JsonProperty("import_spells")
+	private boolean importSpells = false;
+
 	@JsonProperty("import_custom_item_templates")
 	private boolean importCustomItemTemplates = true;
 
@@ -162,6 +165,14 @@ public class ImportProfile {
 		this.importTalents = v;
 	}
 
+	public boolean isImportSpells() {
+		return importSpells;
+	}
+
+	public void setImportSpells(boolean v) {
+		this.importSpells = v;
+	}
+
 	public Set<Integer> getBlockedSkillIds() {
 		return blockedSkillIds;
 	}
@@ -190,9 +201,9 @@ public class ImportProfile {
 	public String toString() {
 		return String.format(
 				"ImportProfile{name='%s', maxLevel=%d, maxGold=%dg, equip=%b, inv=%b, bank=%b, "
-						+ "pets=%b, hs=%b, skills=%b, rep=%b, quests=%b, talents=%b, customTemplates=%b}",
+						+ "pets=%b, hs=%b, skills=%b, rep=%b, quests=%b, talents=%b, spells=%b, customTemplates=%b}",
 				name, maxLevel, maxGoldCopper / 10_000, importEquipment, importInventory, importBank, importPets,
-				importHearthstone, importSkills, importReputation, importQuestsCompleted, importTalents,
+				importHearthstone, importSkills, importReputation, importQuestsCompleted, importTalents, importSpells,
 				importCustomItemTemplates);
 	}
 }

@@ -70,7 +70,7 @@ public class TrustStore {
 		trustAll = false;
 
 		save();
-		log.info("TrustStore: added server — " + entry);
+		log.info("TrustStore: added server - " + entry);
 	}
 
 	public synchronized boolean remove(String serverPubKey) {
@@ -79,7 +79,7 @@ public class TrustStore {
 		TrustedServer removed = trusted.remove(serverPubKey.toLowerCase());
 		if (removed != null) {
 			save();
-			log.info("TrustStore: removed server — " + removed);
+			log.info("TrustStore: removed server - " + removed);
 			return true;
 		}
 		return false;
@@ -102,7 +102,7 @@ public class TrustStore {
 	private void loadFromDisk() {
 		File file = configFile.toFile();
 		if (!file.exists()) {
-			log.info("TrustStore: " + configFile + " not found — starting in trust-all mode. "
+			log.info("TrustStore: " + configFile + " not found - starting in trust-all mode. "
 					+ "Use POST /admin/trust to add trusted servers (switches to strict mode).");
 			trustAll = true;
 			return;
@@ -121,7 +121,7 @@ public class TrustStore {
 			log.info("TrustStore: loaded " + trusted.size() + " trusted server(s) " + "(trust_all=" + trustAll
 					+ ") from " + configFile);
 		} catch (IOException e) {
-			log.severe("TrustStore: failed to parse " + configFile + " — defaulting to trust-all. " + "Error: "
+			log.severe("TrustStore: failed to parse " + configFile + " - defaulting to trust-all. " + "Error: "
 					+ e.getMessage());
 			trustAll = true;
 		}

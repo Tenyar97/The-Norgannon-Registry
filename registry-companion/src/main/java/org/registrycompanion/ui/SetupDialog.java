@@ -46,7 +46,7 @@ public class SetupDialog {
 	}
 
 	private void buildAndShow() {
-		dialog = new JDialog((Frame) null, "Registry Companion — Setup", true);
+		dialog = new JDialog((Frame) null, "Registry Companion - Setup", true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.setSize(520, 460);
 		dialog.setResizable(false);
@@ -107,7 +107,7 @@ public class SetupDialog {
 
 		JTextArea body = new JTextArea("This companion runs alongside WoW and keeps your character safe.\n\n"
 				+ "If a private server shuts down, your character data is preserved "
-				+ "in a secure registry — and you can import it into any other server "
+				+ "in a secure registry - and you can import it into any other server "
 				+ "that supports this protocol.\n\n" + "Setup takes about 30 seconds. You'll need a pen and paper.");
 		body.setFont(BODY_FONT);
 		body.setForeground(FG_COLOR);

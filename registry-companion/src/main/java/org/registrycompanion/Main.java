@@ -29,7 +29,7 @@ public class Main {
 			JOptionPane.showMessageDialog(null,
 					"Registry Companion failed to start:\n\n" + e.getMessage()
 							+ "\n\nCheck that no other instance is already running.",
-					"Registry Companion — Error", JOptionPane.ERROR_MESSAGE);
+					"Registry Companion - Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
 	}
@@ -50,16 +50,16 @@ public class Main {
 		log.info("Key loaded: " + keyLoaded);
 
 		if (!keyLoaded) {
-			log.info("First run — showing setup dialog");
+			log.info("First run - showing setup dialog");
 
 			boolean setupComplete = showSetupDialog(keyManager);
 
 			if (!setupComplete) {
-				log.info("Setup cancelled — exiting");
+				log.info("Setup cancelled - exiting");
 				System.exit(0);
 			}
 
-			log.info("Setup complete — pubkey=" + keyManager.getPublicKeyHex().substring(0, 8) + "...");
+			log.info("Setup complete - pubkey=" + keyManager.getPublicKeyHex().substring(0, 8) + "...");
 		}
 
 		RecoveryDialog recoveryDialog = new RecoveryDialog();
@@ -71,7 +71,7 @@ public class Main {
 				log.info("Auto-registered for Windows startup");
 			} else {
 				log.warning(
-						"Could not auto-register for Windows startup " + "— player can enable manually from tray menu");
+						"Could not auto-register for Windows startup " + "- player can enable manually from tray menu");
 			}
 		}
 
@@ -79,7 +79,7 @@ public class Main {
 			server = new CompanionServer(keyManager, recoveryDialog);
 			server.start();
 		} catch (java.net.BindException e) {
-			log.warning("Port " + CompanionServer.PORT + " already in use — " + "another instance may be running");
+			log.warning("Port " + CompanionServer.PORT + " already in use - " + "another instance may be running");
 			JOptionPane.showMessageDialog(null, "Registry Companion is already running.\n" + "Check your system tray.",
 					"Already Running", JOptionPane.INFORMATION_MESSAGE);
 			System.exit(0);
@@ -91,7 +91,7 @@ public class Main {
 
 		SwingUtilities.invokeAndWait(trayManager::install);
 
-		log.info("Companion ready — pubkey=" + keyManager.getPublicKeyHex().substring(0, 8) + "...");
+		log.info("Companion ready - pubkey=" + keyManager.getPublicKeyHex().substring(0, 8) + "...");
 
 		if (!keyLoaded) {
 			trayManager.balloon("Registry Companion", "Running in the background. Your characters are now protected.",

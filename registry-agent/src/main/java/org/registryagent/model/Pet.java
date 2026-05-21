@@ -1,23 +1,26 @@
 package org.registryagent.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class Pet {
 
-	private String name; 
-	private String namespace; 
-	private String creatureRef; 
+	private String name;
+	private String namespace;
+	private String creatureRef;
 	private int level;
 	private String petType;
-	private String slot; 
+	private String slot;
 	private int currentHealth;
 	private int currentMana;
 	private int happiness; // 0–1000000, hunter pets only; 0 for warlock demons
+	@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+	private int sourceModelId;
 
 	public Pet() {
 	}
 
 	public Pet(String name, String namespace, String creatureRef, int level, String petType, String slot,
-			int currentHealth, int currentMana, int happiness) {
+			int currentHealth, int currentMana, int happiness, int sourceModelId) {
 		this.name = name;
 		this.namespace = namespace;
 		this.creatureRef = creatureRef;
@@ -27,6 +30,7 @@ public class Pet {
 		this.currentHealth = currentHealth;
 		this.currentMana = currentMana;
 		this.happiness = happiness;
+		this.sourceModelId = sourceModelId;
 	}
 
 	public String getName() {
@@ -99,6 +103,14 @@ public class Pet {
 
 	public void setHappiness(int happiness) {
 		this.happiness = happiness;
+	}
+
+	public int getSourceModelId() {
+		return sourceModelId;
+	}
+
+	public void setSourceModelId(int sourceModelId) {
+		this.sourceModelId = sourceModelId;
 	}
 
 	@Override

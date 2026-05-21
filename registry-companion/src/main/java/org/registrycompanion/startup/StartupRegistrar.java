@@ -15,7 +15,7 @@ public class StartupRegistrar {
 	public boolean register() {
 		String command = resolveLaunchCommand();
 		if (command == null) {
-			log.warning("Could not resolve launch command — startup registration skipped");
+			log.warning("Could not resolve launch command - startup registration skipped");
 			return false;
 		}
 
@@ -51,7 +51,7 @@ public class StartupRegistrar {
 
 			String output = new String(process.getInputStream().readAllBytes());
 			if (output.toLowerCase().contains("unable to find")) {
-				log.fine("Startup key did not exist — nothing to remove");
+				log.fine("Startup key did not exist - nothing to remove");
 				return true;
 			}
 

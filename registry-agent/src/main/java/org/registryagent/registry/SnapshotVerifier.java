@@ -65,7 +65,7 @@ public class SnapshotVerifier {
 			return VerificationResult.fail("Player signature verification failed");
 		}
 
-		log.fine("Snapshot verified — characterId=" + record.getCharacterId() + " sequence=" + record.getSequence());
+		log.fine("Snapshot verified - characterId=" + record.getCharacterId() + " sequence=" + record.getSequence());
 
 		return VerificationResult.ok();
 	}

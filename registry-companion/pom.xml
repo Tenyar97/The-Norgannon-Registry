@@ -164,8 +164,8 @@
                             <versionInfo>
                                 <fileVersion>1.0.0.0</fileVersion>
                                 <txtFileVersion>${project.version}</txtFileVersion>
-                                <fileDescription>Registry Companion — WoW Character Registry</fileDescription>
-                                <copyright>Open Source — MIT License</copyright>
+                                <fileDescription>Registry Companion - WoW Character Registry</fileDescription>
+                                <copyright>Open Source - MIT License</copyright>
                                 <productVersion>1.0.0.0</productVersion>
                                 <txtProductVersion>${project.version}</txtProductVersion>
                                 <productName>Registry Companion</productName>

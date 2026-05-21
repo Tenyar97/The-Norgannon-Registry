@@ -42,7 +42,7 @@ public class ImportProfileLoader {
 			return ImportProfile.permissive();
 		ImportProfile profile = load(name);
 		if (profile == null) {
-			log.warning("ImportProfileLoader: profile '" + name + "' not found — falling back to permissive defaults");
+			log.warning("ImportProfileLoader: profile '" + name + "' not found - falling back to permissive defaults");
 			return ImportProfile.permissive();
 		}
 		return profile;
@@ -80,7 +80,7 @@ public class ImportProfileLoader {
 			if (profile.getName() == null || profile.getName().equals("default")) {
 				profile.setName(name);
 			}
-			log.info("ImportProfileLoader: loaded profile '" + name + "' — " + profile);
+			log.info("ImportProfileLoader: loaded profile '" + name + "' - " + profile);
 			return profile;
 		} catch (IOException e) {
 			log.severe("ImportProfileLoader: failed to parse profile '" + name + "': " + e.getMessage());

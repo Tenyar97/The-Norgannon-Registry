@@ -188,12 +188,12 @@ public class AgentAuthServer {
 		AuthServer.LoginResult result = authServer.handleChallengeResponse(playerPubKey, characterId, signature);
 
 		if (!result.isSuccess()) {
-			log.warning("Auth rejected — pubkey=" + playerPubKey.substring(0, 8) + "... reason=" + result.getReason());
+			log.warning("Auth rejected - pubkey=" + playerPubKey.substring(0, 8) + "... reason=" + result.getReason());
 			sendJson(exchange, 200, Map.of("success", false, "reason", result.getReason()));
 			return;
 		}
 
-		log.info("Auth success — pubkey=" + playerPubKey.substring(0, 8) + "... characterId=" + characterId);
+		log.info("Auth success - pubkey=" + playerPubKey.substring(0, 8) + "... characterId=" + characterId);
 
 		sendJson(exchange, 200,
 				Map.of("success", true, "character_id", characterId, "session_token", result.getSessionToken()));
@@ -221,8 +221,8 @@ public class AgentAuthServer {
 		String playerSignature = signViaCompanion(authToken);
 		if (playerSignature == null) {
 			log.warning(
-					"Login failed — could not reach companion for signing. pubkey=" + pubkey.substring(0, 8) + "...");
-			sendJson(exchange, 503, Map.of("success", false, "reason", "Companion unreachable — is it running?"));
+					"Login failed - could not reach companion for signing. pubkey=" + pubkey.substring(0, 8) + "...");
+			sendJson(exchange, 503, Map.of("success", false, "reason", "Companion unreachable - is it running?"));
 			return;
 		}
 
@@ -231,7 +231,7 @@ public class AgentAuthServer {
 				System.currentTimeMillis());
 		authServer.injectSession(session);
 
-		log.info("Login — pubkey=" + pubkey.substring(0, 8) + "... characterId=" + characterId + " token="
+		log.info("Login - pubkey=" + pubkey.substring(0, 8) + "... characterId=" + characterId + " token="
 				+ sessionToken.substring(0, 8) + "...");
 		sendJson(exchange, 200, Map.of("success", true, "session_token", sessionToken, "character_id", characterId));
 	}
@@ -260,7 +260,7 @@ public class AgentAuthServer {
 		}
 
 		snapshotAgent.onEvent(sessionToken, event);
-		log.fine("Event fired — token=" + sessionToken.substring(0, 8) + "... event=" + event);
+		log.fine("Event fired - token=" + sessionToken.substring(0, 8) + "... event=" + event);
 		sendJson(exchange, 200, Map.of("ok", true));
 	}
 
@@ -285,7 +285,7 @@ public class AgentAuthServer {
 		String authToken = serverId + ":" + pubkey;
 		String playerSignature = signViaCompanion(authToken);
 		if (playerSignature == null) {
-			sendError(exchange, 503, "Could not reach companion at " + COMPANION_URL + " — is it running?");
+			sendError(exchange, 503, "Could not reach companion at " + COMPANION_URL + " - is it running?");
 			return;
 		}
 
@@ -294,7 +294,7 @@ public class AgentAuthServer {
 				System.currentTimeMillis());
 		authServer.injectSession(session);
 
-		log.info("[DEBUG] Session injected — characterId=" + characterId + " token=" + sessionToken.substring(0, 8)
+		log.info("[DEBUG] Session injected - characterId=" + characterId + " token=" + sessionToken.substring(0, 8)
 				+ "...");
 		sendJson(exchange, 200, Map.of("session_token", sessionToken, "character_id", characterId));
 	}
@@ -344,7 +344,7 @@ public class AgentAuthServer {
 		}
 
 		snapshotAgent.onEvent(sessionToken, event);
-		log.info("[DEBUG] Event fired — token=" + sessionToken.substring(0, 8) + "... event=" + event);
+		log.info("[DEBUG] Event fired - token=" + sessionToken.substring(0, 8) + "... event=" + event);
 		sendJson(exchange, 200, Map.of("ok", true));
 	}
 
@@ -367,14 +367,10 @@ public class AgentAuthServer {
 			return;
 		}
 
-		// Resolve the import profile — supports:
-		//   "profile": "vanilla_transfer"   → loads profiles/vanilla_transfer.json
-		//   "profile": { ... }              → deserializes an inline profile object
-		//   (absent / null)                 → permissive, no restrictions
 		ImportProfile profile = resolveProfile(body.get("profile"));
 		String profileName = profile != null ? profile.getName() : "permissive";
 
-		log.info("Admin import requested — characterId=" + characterId
+		log.info("Admin import requested - characterId=" + characterId
 				+ " pubkey=" + playerPubKey.substring(0, Math.min(8, playerPubKey.length())) + "..."
 				+ " profile=" + profileName);
 
@@ -389,7 +385,7 @@ public class AgentAuthServer {
 			sendJson(exchange, 200, Map.of(
 					"ok",     false,
 					"reason", "No snapshot found in registry for characterId=" + characterId
-							  + " — check that the player has authenticated at least once."));
+							  + " - check that the player has authenticated at least once."));
 		}
 	}
 
@@ -397,16 +393,14 @@ public class AgentAuthServer {
 		if (raw == null) return null;
 
 		if (raw instanceof String name) {
-			// Named profile — look up from profiles/ directory
 			ImportProfile profile = profileLoader.load(name);
 			if (profile == null) {
-				log.warning("Import profile '" + name + "' not found in profiles/ — using permissive defaults");
+				log.warning("Import profile '" + name + "' not found in profiles/ - using permissive defaults");
 			}
 			return profile;
 		}
 
 		if (raw instanceof Map<?, ?>) {
-			// Inline profile object embedded directly in the request
 			try {
 				return mapper.convertValue(raw, ImportProfile.class);
 			} catch (Exception e) {
@@ -419,7 +413,7 @@ public class AgentAuthServer {
 		return null;
 	}
 
-	private void handleTrustList(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleTrustList(HttpExchange exchange) throws IOException {
 		var servers = trustStore.list().stream()
 				.map(s -> Map.of(
 						"pub_key",         s.getPubKey(),
@@ -434,7 +428,7 @@ public class AgentAuthServer {
 				"servers",   servers));
 	}
 
-	private void handleTrustAdd(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+	private void handleTrustAdd(HttpExchange exchange) throws IOException {
 		Map<?, ?> body = readJson(exchange);
 		if (body == null) { sendError(exchange, 400, "Invalid JSON"); return; }
 
@@ -450,12 +444,12 @@ public class AgentAuthServer {
 		TrustedServer entry = new TrustedServer(pubKey.toLowerCase(), label, null, profile);
 		trustStore.add(entry);
 
-		log.info("Trust list updated — added server label='" + label + "' pubKey=" + pubKey.substring(0, Math.min(16, pubKey.length())) + "...");
+		log.info("Trust list updated - added server label='" + label + "' pubKey=" + pubKey.substring(0, Math.min(16, pubKey.length())) + "...");
 
 		sendJson(exchange, 200, Map.of(
 				"ok",      true,
 				"message", "Server '" + label + "' added to trust list. "
-						   + "This server is now in strict mode — only listed servers can be imported from."));
+						   + "This server is now in strict mode - only listed servers can be imported from."));
 	}
 	
 	private void handleTrustRemove(HttpExchange exchange) throws IOException {
@@ -492,8 +486,8 @@ public class AgentAuthServer {
 
 		String playerSignature = signViaCompanion(serverId + ":" + pubkey);
 		if (playerSignature == null) {
-			log.warning("processLogin — companion unreachable for pubkey=" + pubkey.substring(0, 8) + "...");
-			return new LoginResult(false, null, null, "Companion unreachable — is it running?");
+			log.warning("processLogin - companion unreachable for pubkey=" + pubkey.substring(0, 8) + "...");
+			return new LoginResult(false, null, null, "Companion unreachable - is it running?");
 		}
 
 		String sessionToken = UUID.randomUUID().toString();
@@ -501,7 +495,7 @@ public class AgentAuthServer {
 				System.currentTimeMillis());
 		authServer.injectSession(session);
 
-		log.info("Login (DB queue) — pubkey=" + pubkey.substring(0, 8) + "... characterId=" + characterId);
+		log.info("Login (DB queue) - pubkey=" + pubkey.substring(0, 8) + "... characterId=" + characterId);
 		return new LoginResult(true, sessionToken, characterId, null);
 	}
 

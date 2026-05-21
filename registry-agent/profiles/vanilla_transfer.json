@@ -1,6 +1,6 @@
 {
   "name": "vanilla_transfer",
-  "description": "For transferring characters from a Vanilla (1-60) server to a WotLK server. Caps level at 60 and gold at 100g. Talents excluded — Vanilla trees do not map to Wrath specs. Hearthstone excluded — inn binding IDs differ between expansions. Custom item templates excluded — Vanilla-era custom entries are unlikely to be valid on a WotLK database.",
+  "description": "For transferring characters from a Vanilla (1-60) server to a WotLK server. Caps level at 60 and gold at 100g. Talents excluded - Vanilla trees do not map to Wrath specs. Hearthstone excluded - inn binding IDs differ between expansions. Custom item templates excluded - Vanilla-era custom entries are unlikely to be valid on a WotLK database.",
 
   "max_level": 60,
   "max_gold_copper": 1000000,

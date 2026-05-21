@@ -32,7 +32,7 @@ public class SignHandler extends BaseHandler implements HttpHandler {
 		}
 
 		if (!keyManager.isReady()) {
-			sendError(exchange, 503, "No key loaded — setup not complete");
+			sendError(exchange, 503, "No key loaded - setup not complete");
 			return;
 		}
 
@@ -70,7 +70,7 @@ public class SignHandler extends BaseHandler implements HttpHandler {
 			} else {
 				String signature = keyManager.sign(message);
 
-				log.fine("Challenge signed — message length=" + message.length());
+				log.fine("Challenge signed - message length=" + message.length());
 
 				sendOk(exchange, Map.of("signature", signature, "pubkey", keyManager.getPublicKeyHex()));
 			}

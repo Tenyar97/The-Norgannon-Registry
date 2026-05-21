@@ -20,7 +20,7 @@ public class AzerothCoreAdapter extends TrinityCoreAdapter {
 
 	public AzerothCoreAdapter(String jdbcUrl, String username, String password) {
 		super(jdbcUrl, username, password);
-		log.info("AzerothCoreAdapter initialised — namespace=" + NAMESPACE);
+		log.info("AzerothCoreAdapter initialised - namespace=" + NAMESPACE);
 	}
 
 	@Override

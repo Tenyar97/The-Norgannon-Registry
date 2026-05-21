@@ -33,7 +33,7 @@ public class SnapshotStore {
 				.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-		log.info("SnapshotStore initialised — dataDir=" + dataDir);
+		log.info("SnapshotStore initialised - dataDir=" + dataDir);
 	}
 
 	public SnapshotRecord get(String characterId) {
@@ -78,7 +78,7 @@ public class SnapshotStore {
 			long currentSeq = currentSequence(characterId);
 
 			if (record.getSequence() <= currentSeq) {
-				log.fine("Stale record ignored — characterId=" + characterId + " incoming=" + record.getSequence()
+				log.fine("Stale record ignored - characterId=" + characterId + " incoming=" + record.getSequence()
 						+ " current=" + currentSeq);
 				return StoreResult.STALE;
 			}
@@ -91,7 +91,7 @@ public class SnapshotStore {
 
 			cache.put(characterId, record);
 
-			log.info("Record stored — characterId=" + characterId + " sequence=" + record.getSequence());
+			log.info("Record stored - characterId=" + characterId + " sequence=" + record.getSequence());
 
 			return StoreResult.STORED;
 
@@ -130,7 +130,7 @@ public class SnapshotStore {
 				loaded++;
 		}
 
-		log.info("Warmup complete — " + loaded + " records loaded into cache");
+		log.info("Warmup complete - " + loaded + " records loaded into cache");
 	}
 
 	private Path filePath(String characterId) {

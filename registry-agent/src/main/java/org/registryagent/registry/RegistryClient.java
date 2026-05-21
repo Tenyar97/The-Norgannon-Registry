@@ -59,7 +59,7 @@ public class RegistryClient {
 		List<RegistryNode> shuffled = availableNodes();
 
 		if (shuffled.isEmpty()) {
-			log.warning("No available nodes to fetch from — characterId=" + characterId);
+			log.warning("No available nodes to fetch from - characterId=" + characterId);
 			return null;
 		}
 
@@ -71,7 +71,7 @@ public class RegistryClient {
 				continue;
 
 			if (!playerPubKey.equals(record.getPlayerPubKey())) {
-				log.warning("Ownership mismatch — characterId=" + characterId + " expected key="
+				log.warning("Ownership mismatch - characterId=" + characterId + " expected key="
 						+ playerPubKey.substring(0, 8) + "..." + " got=" + record.getPlayerPubKey().substring(0, 8)
 						+ "...");
 				continue;
@@ -85,19 +85,19 @@ public class RegistryClient {
 		}
 
 		if (best != null) {
-			log.info("Fetched record — characterId=" + characterId + " sequence=" + best.getSequence());
+			log.info("Fetched record - characterId=" + characterId + " sequence=" + best.getSequence());
 		}
 
 		return best;
 	}
 
-	public void broadcast(SnapshotRecord record) {
+	public boolean broadcast(SnapshotRecord record) {
 		List<RegistryNode> targets = availableNodes();
 
 		if (targets.isEmpty()) {
-			log.warning("No available nodes — queuing snapshot for retry. " + "characterId=" + record.getCharacterId());
+			log.warning("No available nodes - queuing snapshot for retry. " + "characterId=" + record.getCharacterId());
 			retryQueue.add(record);
-			return;
+			return false;
 		}
 
 		List<Future<Boolean>> futures = new ArrayList<>();
@@ -115,16 +115,18 @@ public class RegistryClient {
 			}
 		}
 
-		if (acks >= QUORUM) {
-			log.info("Broadcast acknowledged by " + acks + "/" + targets.size() + " nodes — characterId="
+		boolean quorumReached = acks >= QUORUM;
+		if (quorumReached) {
+			log.info("Broadcast acknowledged by " + acks + "/" + targets.size() + " nodes - characterId="
 					+ record.getCharacterId() + " sequence=" + record.getSequence());
 		} else {
-			log.warning("Broadcast under-quorum (" + acks + "/" + targets.size() + ") — queuing for retry. characterId="
+			log.warning("Broadcast under-quorum (" + acks + "/" + targets.size() + ") - queuing for retry. characterId="
 					+ record.getCharacterId());
 			retryQueue.add(record);
 		}
 
 		flushRetryQueue(targets);
+		return quorumReached;
 	}
 
 	private void flushRetryQueue(List<RegistryNode> targets) {
@@ -144,9 +146,9 @@ public class RegistryClient {
 			}
 			if (!pushed) {
 				retryQueue.add(record);
-				log.warning("Retry failed — re-queued characterId=" + record.getCharacterId());
+				log.warning("Retry failed - re-queued characterId=" + record.getCharacterId());
 			} else {
-				log.info("Retry succeeded — characterId=" + record.getCharacterId());
+				log.info("Retry succeeded - characterId=" + record.getCharacterId());
 			}
 		}
 	}
